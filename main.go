@@ -88,10 +88,11 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 		http.NotFound(w, r)
 		return
 	}
-
+	log.Println(r.Body)
 	decoder := json.NewDecoder(r.Body)
-	var listofwords map[string]int
-	err := decoder.Decode(&listofwords)
+	// var listofwords map[string]int
+	var wordtolookup string
+	err := decoder.Decode(&wordtolookup)
 	if err != nil {
 		log.Println("I tried")
 		log.Println(r.Body)
@@ -109,82 +110,71 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 	}
 	defer stmt.Close()
 
-	// var id []int
-	// var k_ele_val string
 	word_definitions := make(map[string]*entry)
+	word_definitions[wordtolookup] = NewEntry()
+	parameter := wordtolookup
+	rows, err := stmt.Query(parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
 
-	for wordtolookup := range listofwords {
-		log.Println("wordtolookup: ", wordtolookup)
-		word_definitions[wordtolookup] = NewEntry()
-		parameter := wordtolookup + "%"
-		rows, err := stmt.Query(parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter)
-		if err != nil {
-			log.Fatal(err)
+	for rows.Next() {
+		var kanji, sense_id_value string
+		var ke_pri_val, r_ele_val, re_restr_val, re_pri_val, stagk_val, stagr_val, xref_val, ant_val, s_inf_val, gloss_val sql.NullString
+		var ke_inf_val, re_inf_val, field_val, misc_val, pos_val sql.NullInt64
+		var k_ele_id, ke_inf_id,  ke_pri_id, r_ele_id, re_restr_id, re_inf_id, re_pri_id, sense_id, stagk_id, stagr_id, pos_id, xref_id, ant_id, field_id, misc_id, s_inf_id, gloss_id sql.NullInt64
+
+		rows.Scan(&kanji,&k_ele_id,&ke_inf_id,&ke_inf_val,&ke_pri_id,&ke_pri_val,&r_ele_id,&r_ele_val,&re_restr_id,&re_restr_val,&re_inf_id,&re_inf_val,&re_pri_id,&re_pri_val,&sense_id,&stagk_id,&stagk_val,&stagr_id,&stagr_val,&pos_id,&pos_val,&xref_id,&xref_val,&ant_id,&ant_val,&field_id,&field_val,&misc_id,&misc_val,&s_inf_id,&s_inf_val,&gloss_id,&gloss_val)
+
+		// log.Println(kanji,"kanji",k_ele_id,"k_ele_id",ke_inf_id,"ke_inf_id",ke_inf_val,"ke_inf_val",ke_pri_id,"ke_pri_id",ke_pri_val,"ke_pri_val",r_ele_id,"r_ele_id",r_ele_val,"r_ele_val",re_restr_id,"re_restr_id",re_restr_val,"re_restr_val",re_inf_id,"re_inf_id",re_inf_val,"re_inf_val",re_pri_id,"re_pri_id",re_pri_val,"re_pri_val",sense_id,"sense_id",stagk_id,"stagk_id",stagk_val,"stagk_val",stagr_id,"stagr_id",stagr_val,"stagr_val",pos_id,"pos_id",pos_val,"pos_val",xref_id,"xref_id",xref_val,"xref_val",ant_id,"ant_id",ant_val,"ant_val",field_id,"field_id",field_val,"field_val",misc_id,"misc_id",misc_val,"misc_val",s_inf_id,"s_inf_id",s_inf_val,"s_inf_val",gloss_id,"gloss_id",gloss_val,"gloss_val")
+		if k_ele_id.Valid && word_definitions[wordtolookup].MatchingKanji[kanji] == nil {
+			word_definitions[wordtolookup].MatchingKanji[kanji] = NewDictionaryResult()
 		}
-		defer rows.Close()
-		// count := 0
-		for rows.Next() {
-			var kanji, sense_id_value string
-			var ke_pri_val, r_ele_val, re_restr_val, re_pri_val, stagk_val, stagr_val, xref_val, ant_val, s_inf_val, gloss_val sql.NullString
-			var ke_inf_val, re_inf_val, field_val, misc_val, pos_val sql.NullInt64
-			var k_ele_id, ke_inf_id,  ke_pri_id, r_ele_id, re_restr_id, re_inf_id, re_pri_id, sense_id, stagk_id, stagr_id, pos_id, xref_id, ant_id, field_id, misc_id, s_inf_id, gloss_id sql.NullInt64
 
-			rows.Scan(&kanji,&k_ele_id,&ke_inf_id,&ke_inf_val,&ke_pri_id,&ke_pri_val,&r_ele_id,&r_ele_val,&re_restr_id,&re_restr_val,&re_inf_id,&re_inf_val,&re_pri_id,&re_pri_val,&sense_id,&stagk_id,&stagk_val,&stagr_id,&stagr_val,&pos_id,&pos_val,&xref_id,&xref_val,&ant_id,&ant_val,&field_id,&field_val,&misc_id,&misc_val,&s_inf_id,&s_inf_val,&gloss_id,&gloss_val)
-
-			log.Println(kanji,"kanji",k_ele_id,"k_ele_id",ke_inf_id,"ke_inf_id",ke_inf_val,"ke_inf_val",ke_pri_id,"ke_pri_id",ke_pri_val,"ke_pri_val",r_ele_id,"r_ele_id",r_ele_val,"r_ele_val",re_restr_id,"re_restr_id",re_restr_val,"re_restr_val",re_inf_id,"re_inf_id",re_inf_val,"re_inf_val",re_pri_id,"re_pri_id",re_pri_val,"re_pri_val",sense_id,"sense_id",stagk_id,"stagk_id",stagk_val,"stagk_val",stagr_id,"stagr_id",stagr_val,"stagr_val",pos_id,"pos_id",pos_val,"pos_val",xref_id,"xref_id",xref_val,"xref_val",ant_id,"ant_id",ant_val,"ant_val",field_id,"field_id",field_val,"field_val",misc_id,"misc_id",misc_val,"misc_val",s_inf_id,"s_inf_id",s_inf_val,"s_inf_val",gloss_id,"gloss_id",gloss_val,"gloss_val")
-			// count = count + 1
-			// log.Println(count)
-			if k_ele_id.Valid && word_definitions[wordtolookup].MatchingKanji[kanji] == nil {
-				log.Println("initializing MatchingKanji")
-				word_definitions[wordtolookup].MatchingKanji[kanji] = NewDictionaryResult()
+		if sense_id.Valid {
+			sense_id_value = strconv.FormatInt(sense_id.Int64, 10)
+			if word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value] == nil {
+				word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value] = &Senseinfo{}
 			}
+		}
 
-			if sense_id.Valid {
-				sense_id_value = strconv.FormatInt(sense_id.Int64, 10)
-				if word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value] == nil {
-					log.Println("Initiazing Senseinfo for: ", sense_id)
-					word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value] = &Senseinfo{}
-				}
-			}
+		if r_ele_val.Valid && word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String] == nil {
+			word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String] = &Releinfo{}
+		}
+		switch {
+		case ke_inf_id.Valid:
+			word_definitions[wordtolookup].MatchingKanji[kanji].K_ele.Ke_inf = append(word_definitions[wordtolookup].MatchingKanji[kanji].K_ele.Ke_inf, ke_inf_val.Int64)
+		case ke_pri_id.Valid:
+			word_definitions[wordtolookup].MatchingKanji[kanji].K_ele.Ke_pri = append(word_definitions[wordtolookup].MatchingKanji[kanji].K_ele.Ke_pri, ke_pri_val.String)
+		case re_restr_id.Valid:
+			word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String].Re_restr = append(word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String].Re_restr, re_restr_val.String)
+		case re_inf_id.Valid:
+			word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String].Re_inf = append(word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String].Re_inf, re_inf_val.Int64)
+		case re_pri_id.Valid:
+			word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String].Re_pri = append(word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String].Re_pri, re_pri_val.String)
+		case stagk_val.Valid:
+			word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Stagk = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Stagk, stagk_val.String)
+		case stagr_id.Valid:
+			word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Stagr = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Stagr, stagr_val.String)
+		case pos_id.Valid:
+			word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Pos = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Pos, pos_val.Int64)
+		case xref_id.Valid:
+			word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Xref = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Xref, xref_val.String)
+		case ant_id.Valid:
+			word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Ant = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Ant, ant_val.String)
+		case field_id.Valid:
+			word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Field = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Field, field_val.Int64)
+		case misc_id.Valid:
+			word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Misc = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Misc, misc_val.Int64)
+		case s_inf_id.Valid:
+			word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].S_inf = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].S_inf, s_inf_val.String)
+		case gloss_id.Valid:
+			word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Gloss = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Gloss, gloss_val.String)
 
-			if r_ele_val.Valid && word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String] == nil {
-				word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String] = &Releinfo{}
-			}
-			switch {
-			case ke_inf_id.Valid:
-				word_definitions[wordtolookup].MatchingKanji[kanji].K_ele.Ke_inf = append(word_definitions[wordtolookup].MatchingKanji[kanji].K_ele.Ke_inf, ke_inf_val.Int64)
-			case ke_pri_id.Valid:
-				word_definitions[wordtolookup].MatchingKanji[kanji].K_ele.Ke_pri = append(word_definitions[wordtolookup].MatchingKanji[kanji].K_ele.Ke_pri, ke_pri_val.String)
-			case re_restr_id.Valid:
-				word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String].Re_restr = append(word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String].Re_restr, re_restr_val.String)
-			case re_inf_id.Valid:
-				word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String].Re_inf = append(word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String].Re_inf, re_inf_val.Int64)
-			case re_pri_id.Valid:
-				word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String].Re_pri = append(word_definitions[wordtolookup].MatchingKanji[kanji].R_ele[r_ele_val.String].Re_pri, re_pri_val.String)
-			case stagk_val.Valid:
-				word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Stagk = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Stagk, stagk_val.String)
-			case stagr_id.Valid:
-				word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Stagr = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Stagr, stagr_val.String)
-			case pos_id.Valid:
-				log.Println("pos")
-				// word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value] = &Senseinfo{}
-				word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Pos = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Pos, pos_val.Int64)
-			case xref_id.Valid:
-				word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Xref = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Xref, xref_val.String)
-			case ant_id.Valid:
-				word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Ant = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Ant, ant_val.String)
-			case field_id.Valid:
-				word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Field = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Field, field_val.Int64)
-			case misc_id.Valid:
-				word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Misc = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Misc, misc_val.Int64)
-			case s_inf_id.Valid:
-				word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].S_inf = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].S_inf, s_inf_val.String)
-			case gloss_id.Valid:
-				word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Gloss = append(word_definitions[wordtolookup].MatchingKanji[kanji].Sense[sense_id_value].Gloss, gloss_val.String)
-
-			}
 		}
 	}
+
 
 	// log.Println(word_definitions)
 	jsontext, err := json.Marshal(word_definitions)
