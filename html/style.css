@@ -1,0 +1,21 @@
+#container {
+    float:left;
+}
+
+#inputarea {
+    float:left;
+}
+
+#input {
+    float: left;
+}
+
+#lookupbutton {
+    float: left;
+    clear: left;
+}
+
+#outputarea {
+    float: left;
+    width: 700px;
+}

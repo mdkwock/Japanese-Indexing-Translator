@@ -16,7 +16,7 @@ button.addEventListener('click', function () {
 	definitions = JSON.stringify(i);
 	$.post("/post", definitions,
 	       function(data,status){
-		   $("#output").append('<p>'+data+'</p>');
+		   $("#outputarea").append('<p>'+data+'</p>');
 	       });
     }
 });
