@@ -2,7 +2,7 @@
     float:left;
 }
 
-#inputarea {
+#inputcolumn {
     float:left;
     width:200px;
 }
@@ -16,9 +16,51 @@
     clear: left;
 }
 
-#outputarea {
+#outputcolumn {
     float: left;
-    width: 700px;
+    width: 300px;
+    margin-right: 20px;
+}
+
+#definitionscolumn {
+    float: left;
+    width: 400px;
+}
+
+.definition {
+  position: relative;
+  vertical-align: top;
+  width: 100%;
+  height: 120px;
+  padding: 0;
+  font-size: 22px;
+  color: white;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  background: #60CF6E;
+  border: 0;
+  cursor: pointer;
+}
+
+.definition-left {
+    margin-left: 30px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    float: left;
+}
+
+.definition-middle {
+    margin-left: 90px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    float: left;
+}
+
+.definition-right {
+    margin-right: 30px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    float: right;
 }
 
 .flat-button {
@@ -31,7 +73,7 @@
   color: white;
   text-align: center;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-  background: #000000;
+  background: #60CF6E;
   border: 0;
   cursor: pointer;
 }
