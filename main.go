@@ -98,7 +98,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 		log.Println(r.Body)
 	}
 
-	db, err := sql.Open("sqlite3", "./jmdict.db")
+	db, err := sql.Open("sqlite3", "jmdict.db")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -11,12 +11,7 @@ var button = document.querySelector('#lookupbutton');
 
 button.addEventListener('click', function () {
     statistics = wordStat(input.value);
-    for (var i in statistics) {
-	console.log(i);
-	definitions = JSON.stringify(i);
-	$.post("/post", definitions,
-	       function(data,status){
-		   $("#outputarea").append('<p>'+data+'</p>');
-	       });
+    for (var word in statistics) {
+	$("#outputarea").append('<input type="submit" value="'+word+'" class="flat-button">');
     }
 });
