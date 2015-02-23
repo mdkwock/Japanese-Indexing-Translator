@@ -1,3 +1,12 @@
+body {
+    font-family: Sans-serif;
+    font-size: 62.5%;
+    color: black;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    min-width: 900px;
+}
 #container {
     float:left;
 }
@@ -18,49 +27,87 @@
 
 #outputcolumn {
     float: left;
-    width: 300px;
+    width: 200px;
     margin-right: 20px;
 }
 
 #definitionscolumn {
     float: left;
-    width: 400px;
+    margin: 0 15px;
 }
 
-.definition {
-  position: relative;
-  vertical-align: top;
-  width: 100%;
-  height: 120px;
-  padding: 0;
-  font-size: 22px;
-  color: white;
-  text-align: center;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-  background: #60CF6E;
-  border: 0;
-  cursor: pointer;
+#word_result {
+    font-size: 1em;
+    border-width: 1px 0 1px 0;
+    border-style: solid;
+    border-color: #666;
+    margin: 0;
+    width: 100%;
 }
 
-.definition-left {
-    margin-left: 30px;
-    margin-top: 30px;
-    margin-bottom: 30px;
+#word_result .kanji_column {
+    width: 20%;
+}
+
+#word_result .kanji {
+    font-family: "HiraKakuPro-W3", "Hiragino Kaku Gothic Pro W3", "ヒラギノ角ゴ Pro W3", Meiryo, "MS PGothic", Sans-Serif;
+    font-size: 1.8em;
+    position: relative;
+    width: 98%;
+    display: block;
+    color: #000;
+}
+
+#word_result .kana_column {
+    font-family: "HiraKakuPro-W3", "Hiragino Kaku Gothic Pro W3", "ヒラギノ角ゴ Pro W3", Meiryo, "MS PGothic", Sans-Serif;
+    font-size: 1.8em;
+    width: 20%;
+}
+
+#word_result td {
+    vertical-align: top;
+    padding: 3px;
+}
+
+#word_result .meanings_column {
+    font: 1.6em Georgia, 'Lucida Grande', Helvetica, Sans-serif;
+    width: 60%;
+}
+
+#word_result .tags {
+    font-family: 'Times New Roman', Times, Serif;
+    font-style: italic;
+    font-size: 1.5em;
+    font-weight: normal;
+    color: #444;
+}
+
+#word_result .mn_tags {
+    font-size: 0.8125em;
+}
+
+#word_result .links {
+    font-size: 1.3em;
+    font-family: 'Lucida Grande', Geneva, Verdana, Arial, Sans-serif;
+    font-weight: normal;
+}
+
+.menu {
+    display: inline;
+}
+
+.menu li {
+    display: inline;
     float: left;
+    margin-right: 1em;
 }
 
-.definition-middle {
-    margin-left: 90px;
-    margin-top: 30px;
-    margin-bottom: 30px;
-    float: left;
+.menu, .menu ul {
+    min-height: 0;
 }
 
-.definition-right {
-    margin-right: 30px;
-    margin-top: 30px;
-    margin-bottom: 30px;
-    float: right;
+#word_result tr.even {
+    background-color: #EDF9FF;
 }
 
 .flat-button {
@@ -73,7 +120,7 @@
   color: white;
   text-align: center;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-  background: #60CF6E;
+  background: #FFF;
   border: 0;
   cursor: pointer;
 }
