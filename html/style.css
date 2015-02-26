@@ -7,33 +7,42 @@ body {
     background-color: #fff;
     min-width: 900px;
 }
-#container {
-    float:left;
-}
 
-#inputcolumn {
-    float:left;
-    width:200px;
+.input-column {
+    width: 13%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 15px;
+    margin-bottom: 30px;
+    display: block;
 }
 
 #input {
-    float: left;
+    width: 100%;
 }
 
 #lookupbutton {
-    float: left;
+    float: right;
     clear: left;
 }
 
-#outputcolumn {
-    float: left;
-    width: 200px;
-    margin-right: 20px;
+.output-column {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
 }
 
-#definitionscolumn {
-    float: left;
-    margin: 0 15px;
+.carousel {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.definitionscolumn {
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
 }
 
 #word_result {
@@ -113,17 +122,18 @@ body {
 .flat-button {
   position: relative;
   vertical-align: top;
-  width: 100%;
+  width: 90%;
   height: 60px;
   padding: 0;
   font-size: 22px;
   color: white;
   text-align: center;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-  background: #FFF;
+  background: #657391;
   border: 0;
   cursor: pointer;
 }
+
 .flat-button:active {
   top: 1px;
   outline: none;
