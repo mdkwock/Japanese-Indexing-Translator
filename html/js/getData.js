@@ -7,33 +7,30 @@ function wordStat(text) {
 }
 
 function showDefinitions(kanji) {
+    console.log("debugging");
     var table = document.querySelector('#word_result');
     var definitions = document.createElement('tbody');
+    console.log("debugging");
     wordtolookup = JSON.stringify(kanji);
     $.post("/post", wordtolookup,
 	   function(data,status){
-	       kanjis = data[kanji].MatchingKanji;
-	       for (var definition in kanjis) {
-		   keleinfo = kanjis[definition].Keleinfo
-		   releinfo = kanjis[definition].Releinfo
-		   senseinfo = kanjis[definition].Senseinfo
-	       }
+	       $("#keleinfo").append(data);
 	   });
 }
 
 var input = document.querySelector('#input');
-var button = document.querySelector('#lookupbutton');
-
-button.addEventListener('click', function () {
-    statistics = wordStat(input.value);
-    for (var word in statistics) {
-	$("#outputarea").append('<input type="submit" value="'+word+'" class="flat-button">');
-    }
-});
 
 input.addEventListener('keyup', function () {
+    document.getElementById("outputarea").innerHTML = "";
+    $(".outputarea").append('<div id="carousel" class="carousel" data-slick="{"slidesToShow": 4, "slidesToScroll": 4}"></div>');
     statistics = wordStat(input.value);
     for (var word in statistics) {
-	$("#carousel").append('<div><button type="button" value="'+word+'" class="flat-button" onclick="showDefinitions('+word+')">'+word+': '+statistics[word]+'</button></div>');
+	$(".carousel").append('<div><button type="button" value="'+word+'" class="flat-button" onclick="showDefinitions(\''+word+'\');">'+word+': '+statistics[word]+'</button></div>');
     }
+
+    $('.carousel').slick({
+	slidesToShow: 3,
+	slidesToScroll: 3,
+	dots: true
+    });
 });
