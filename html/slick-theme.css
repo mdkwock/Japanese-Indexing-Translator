@@ -23,17 +23,18 @@
     line-height: 0;
 
     position: absolute;
-    top: 50%;
+    top: 17.3%;
 
     display: block;
 
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 100%;
     margin-top: -10px;
     padding: 0;
 
     cursor: pointer;
 
+    /* content: url('../codereview.png'); */
     color: transparent;
     border: none;
     outline: none;
@@ -120,7 +121,7 @@
 .slick-dots
 {
     position: absolute;
-    bottom: -45px;
+    bottom: -32px;
 
     display: block;
 
