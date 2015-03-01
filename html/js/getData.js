@@ -11,10 +11,32 @@ function showDefinitions(kanji) {
     var definitions = document.createElement('tbody');
     console.log("debugging");
     wordtolookup = JSON.stringify(kanji);
+    console.log("debugging");
     $.post("/post", wordtolookup,
-	   function(data,status){
-	       $("#keleinfo").append(data);
-	       $("#releinfo").append("<h3>Test</h3>");
+	   function(data,status) {
+	       $("#keleinfo").append(data[kanji]);
+	       results = JSON.parse(data);
+	       console.log(results);
+	       console.log(definitions);
+	       var odd = true;
+	       for (var row in results) {
+		   var tr = document.createElement('tr'),
+		       kanji_td = document.createElement('td'),
+		       kana_td = document.createElement('td'),
+		       meanings_td = document.createElement('td'),
+		       span = document.createElement('span'),
+		       kanji_text = document.createTextNode(row),
+		       kana_text = document.createTextNode(results[''].);
+
+		   if (odd) tr.className = 'odd'; else tr.className = 'even';
+		   kanji_td.className = 'kanji_column';
+		   span.className = 'kanji';
+		   span.appendChild(textnode);
+		   td.appendChild(span);
+		   tr.appendChild(kanji_td);
+
+		   kana_td.className = 'kana_column';
+	       }
 	   });
 }
 
