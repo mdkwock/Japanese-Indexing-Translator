@@ -7,38 +7,76 @@ function wordStat(text) {
 }
 
 function showDefinitions(kanji) {
-    var table = document.querySelector('#word_result');
-    var definitions = document.createElement('tbody');
-    console.log("debugging");
+    $('#definitions').empty();
+    var definitions = document.getElementById('definitions');
+
     wordtolookup = JSON.stringify(kanji);
-    console.log("debugging");
     $.post("/post", wordtolookup,
 	   function(data,status) {
-	       $("#keleinfo").append(data[kanji]);
 	       results = JSON.parse(data);
 	       console.log(results);
-	       console.log(definitions);
 	       var odd = true;
 	       for (var row in results) {
-		   var tr = document.createElement('tr'),
-		       kanji_td = document.createElement('td'),
-		       kana_td = document.createElement('td'),
-		       meanings_td = document.createElement('td'),
-		       span = document.createElement('span'),
-		       kanji_text = document.createTextNode(row),
-		       kana_text = document.createTextNode(results[''].);
+		   for (var kana in results[row]['R_ele']) {
+		       var tr = document.createElement('tr'),
+			   kanji_td = document.createElement('td'),
+			   kana_td = document.createElement('td'),
+			   meanings_td = document.createElement('td'),
+			   span = document.createElement('span'),
+			   kanji_text = document.createTextNode(results[row]['K_ele'].Kanji),
+			   kana_text = document.createTextNode(kana);
 
-		   if (odd) tr.className = 'odd'; else tr.className = 'even';
-		   kanji_td.className = 'kanji_column';
-		   span.className = 'kanji';
-		   span.appendChild(textnode);
-		   td.appendChild(span);
-		   tr.appendChild(kanji_td);
+		       tr.className = (odd) ? 'odd' : 'even';
+		       odd = !odd;
 
-		   kana_td.className = 'kana_column';
+		       // Kanji column
+		       kanji_td.className = 'kanji_column';
+		       span.className = 'kanji';
+		       span.appendChild(kanji_text);
+		       kanji_td.appendChild(span);
+		       tr.appendChild(kanji_td);
+
+		       // Kana column
+		       kana_td.className = 'kana_column';
+		       kana_td.appendChild(kana_text);
+		       tr.appendChild(kana_td);
+
+		       // Meanings column
+		       meanings_td.className = 'meanings_column';
+		       var definitionNum = 1;
+		       var numberOfDefinitions = Object.size(results[row]['Sense']);
+		       var numberTheList = (numberOfDefinitions > 1);
+
+		       for (var meaning in results[row]['Sense']) {
+			   var meaning_text = document.createTextNode(results[row]['Sense'][meaning].Gloss.join('; '));
+			   var br = document.createElement('br');
+
+			   if (numberTheList) {
+			       var number = document.createElement('strong');
+			       number.appendChild(document.createTextNode(definitionNum + '. '));
+			       meanings_td.appendChild(number);
+			   }
+
+			   meanings_td.appendChild(meaning_text);
+			   meanings_td.appendChild(br);
+
+			   definitionNum++;
+		       }
+		       tr.appendChild(meanings_td);
+
+		       definitions.appendChild(tr);
+		   }
 	       }
 	   });
 }
+
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
 
 var input = document.querySelector('#input');
 
