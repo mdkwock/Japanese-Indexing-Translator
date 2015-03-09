@@ -23,8 +23,11 @@ function showDefinitions(kanji) {
 			   kana_td = document.createElement('td'),
 			   meanings_td = document.createElement('td'),
 			   span = document.createElement('span'),
+			   spanLower = document.createElement('span'),
 			   kanji_text = document.createTextNode(results[row]['K_ele'].Kanji),
-			   kana_text = document.createTextNode(kana);
+			   kana_text = document.createTextNode(kana),
+			   lowertr = document.createElement('tr'),
+			   lowertd = document.createElement('td');
 
 		       tr.className = (odd) ? 'odd' : 'even';
 		       odd = !odd;
@@ -43,13 +46,16 @@ function showDefinitions(kanji) {
 
 		       // Meanings column
 		       meanings_td.className = 'meanings_column';
-		       var definitionNum = 1;
-		       var numberOfDefinitions = Object.size(results[row]['Sense']);
-		       var numberTheList = (numberOfDefinitions > 1);
+		       var definitionNum = 1,
+		           numberOfDefinitions = Object.size(results[row]['Sense']),
+		           numberTheList = (numberOfDefinitions > 1);
+		       var isCommonWord = (results[row]['K_ele'].Ke_pri != null) ? (results[row]['K_ele'].Ke_pri.length > 0) : false;
+		       var pos_text = [];
 
 		       for (var meaning in results[row]['Sense']) {
 			   var meaning_text = document.createTextNode(results[row]['Sense'][meaning].Gloss.join('; '));
-			   var br = document.createElement('br');
+			   if (results[row]['Sense'][meaning].Pos != null)
+			       pos_text = pos_text.concat(results[row]['Sense'][meaning].Pos);
 
 			   if (numberTheList) {
 			       var number = document.createElement('strong');
@@ -58,13 +64,39 @@ function showDefinitions(kanji) {
 			   }
 
 			   meanings_td.appendChild(meaning_text);
-			   meanings_td.appendChild(br);
+			   if (results[row]['Sense'][meaning].Field != null) {
+			       var numFields = results[row]['Sense'][meaning].Field.length,
+				   fields_text = "";
+			       for (var i = 0; i < numFields; i++) {
+				   fields_text += " ("+ results[row]['Sense'][meaning].Field[i] + ")";
+			       }
+			       console.log(fields_text);
+			       meanings_td.appendChild(document.createTextNode(fields_text));
+			   }
+			   meanings_td.appendChild(document.createElement('br'));
 
 			   definitionNum++;
+
 		       }
+		       //lower part of the row
+		       if (isCommonWord) {
+			   var spanCommon = document.createElement('span');
+			   spanCommon.className = "common";
+			   spanCommon.appendChild(document.createTextNode((pos_text != null) ? 'Common word, ' : 'Common word'));
+			   spanLower.appendChild(spanCommon);
+		       }
+		       spanLower.className = 'tags';
+		       lowertd_text = document.createTextNode(pos_text.join(', '));
+		       spanLower.appendChild(lowertd_text);
+		       lowertr.className = tr.className + " lower";
+		       lowertd.colSpan = 2;
+		       lowertd.appendChild(spanLower);
+		       lowertr.appendChild(lowertd);
+
 		       tr.appendChild(meanings_td);
 
 		       definitions.appendChild(tr);
+		       definitions.appendChild(lowertr);
 		   }
 	       }
 	   });

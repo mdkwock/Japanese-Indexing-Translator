@@ -92,6 +92,11 @@ body {
     color: #444;
 }
 
+#word_result .common {
+    font-weight: normal;
+    color: #007100;
+}
+
 #word_result .mn_tags {
     font-size: 0.8125em;
 }
