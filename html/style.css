@@ -10,28 +10,35 @@ body {
 
 .input-column {
     width: 13%;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 15px;
-    margin-bottom: 20px;
-    display: block;
+    height: 40%;
+    box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    left: 0;
 }
 
 #input {
     width: 100%;
+    height: calc(100% - 40px)
 }
 
 #lookupbutton {
     float: right;
-    clear: left;
+    display: block;
 }
 
 .output-column {
-    width: 50%;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 30px;
-    display: block;
+    height: 100%;
+}
+
+.outputarea {
+    width: 17%;
+    box-sizing: border-box;
+    position: fixed;
+    top: 40%;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
 }
 
 .carousel {
@@ -138,6 +145,7 @@ body {
   background: #657391;
   border: 0;
   cursor: pointer;
+  margin-top: 3px;
 }
 
 .flat-button:active {
