@@ -122,7 +122,9 @@ Object.size = function(obj) {
 
 function addButtonsUsingArray(arrayWithKeys, statsMap) {
     sortedStats = arrayWithKeys.sort(function(a,b) {
-	    return statsMap[b] - statsMap[a];
+	if (statsMap[b] - statsMap[a] == 0)
+	    return b.length - a.length;
+	return statsMap[b] - statsMap[a];
     });
 
     document.getElementById("outputarea").innerHTML = "";
