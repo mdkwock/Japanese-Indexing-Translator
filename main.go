@@ -59,6 +59,16 @@ func NewEntry() *entry {
 	return &entry{make(map[string]*dictionaryresult)}
 }
 
+func makePlaceholders(num int) string {
+	var argHolders string
+	for (num > 1) {
+		argHolders += "?,"
+		num--
+	}
+	argHolders += "?"
+	return argHolders
+}
+
 func main(){
 	fmt.Println("starting server on http://localhost:8888/\n")
 	mux = http.NewServeMux()
@@ -92,13 +102,12 @@ func ParseHandler(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	var textToParse string
+	var textToParse []string
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&textToParse)
-	if err != nil || len(textToParse) < 2{
-		log.Println("Input is only 1 character")
-		log.Println(r.Body)
+	if err != nil {
+		log.Println(err)
 	}
 
 	db, err := sql.Open("sqlite3", "jmdict.db")
@@ -107,46 +116,37 @@ func ParseHandler(w http.ResponseWriter, r *http.Request){
 	}
 	defer db.Close()
 
+	parseSQL = parseSQL + makePlaceholders(len(textToParse)) + ");"
+
 	stmt, err := db.Prepare(parseSQL)
 	if err != nil{
 		log.Fatal(err)
 	}
 	defer stmt.Close()
 
-	validKanjis := make(map[string]int)
-
-	log.Println("About to parse")
-	log.Println("len(textToParse): ", len(textToParse))
-	for pos, _ := range textToParse {
-		log.Println("pos: ", pos)
-		if (pos+6 > len(textToParse)) {
-			// reached the end
-			break;
-		}
-		for end := pos+6; end <= len(textToParse); end += 3 {
-			log.Println("end: ", end)
-			wordtolookup := textToParse[pos:end]
-			log.Println("wordtolookup: ",wordtolookup)
-
-			rows, err := stmt.Query(wordtolookup)
-			if err != nil {
-				log.Fatal(err)
-			}
-			defer rows.Close()
-
-			log.Println("Check if a row is returned.")
-			if rows.Next() {
-				//wordtolookup is a valid word because the database returned something
-				log.Println("row was returned.",validKanjis)
-				validKanjis[wordtolookup]++
-				log.Println("row was returned.",validKanjis)
-			} else {
-				log.Println("row was not returned.",validKanjis)
-				break
-			}
-		}
+	// Query database with the dynamic prepared statement
+	convertedArgs := make([]interface{}, len(textToParse))
+	for i, v := range textToParse {
+		convertedArgs[i] = interface{}(v)
 	}
+	log.Println("convertedArgs: ",convertedArgs)
+	rows, err := stmt.Query(convertedArgs...)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
 
+	log.Println("Loop through the rows")
+
+	var validKanjis []string
+	var kanji string
+	for rows.Next() {
+		err := rows.Scan(&kanji)
+		if err != nil {
+			log.Fatal(err)
+		}
+		validKanjis = append(validKanjis, kanji)
+	}
 	jsontext, err := json.Marshal(validKanjis)
 	if err != nil {
 		log.Println("Json text problem")
@@ -269,6 +269,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 func init(){
 	INDEX_HTML, _ = ioutil.ReadFile("./html/index.html")
 
-	parseSQL = "select 1 from k_ele where value = ?";
+	parseSQL = "select value from k_ele where value IN (";
 	sqlstring = "select k_ele.value as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, NULL as r_ele_id, NULL as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, NULL as sense_id, NULL as stagk_id, NULL as stagk_val, NULL as stagr_id, NULL as stagr_val, NULL as pos_id, NULL as pos_val, NULL as xref_id, NULL as xref_val, NULL as ant_id, NULL as ant_val, NULL as field_id, NULL as field_val, NULL as misc_id, NULL as misc_val, NULL as s_inf_id, NULL as s_inf_val, NULL as gloss_id, NULL as gloss_val from k_ele where value like ? UNION ALL select NULL as kanji, k_ele.id as k_ele_id, ke_inf.id as ke_inf_id, entity.expansion as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, NULL as r_ele_id, NULL as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, NULL as sense_id, NULL as stagk_id, NULL as stagk_val, NULL as stagr_id, NULL as stagr_val, NULL as pos_id, NULL as pos_val, NULL as xref_id, NULL as xref_val, NULL as ant_id, NULL as ant_val, NULL as field_id, NULL as field_val, NULL as misc_id, NULL as misc_val, NULL as s_inf_id, NULL as s_inf_val, NULL as gloss_id, NULL as gloss_val from ke_inf, entity, k_ele where k_ele.value like ? and k_ele.id = ke_inf.fk and ke_inf.entity = entity.id UNION ALL select NULL as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, ke_pri.id as ke_pri_id, ke_pri.value as ke_pri_val, NULL as r_ele_id, NULL as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, NULL as sense_id, NULL as stagk_id, NULL as stagk_val, NULL as stagr_id, NULL as stagr_val, NULL as pos_id, NULL as pos_val, NULL as xref_id, NULL as xref_val, NULL as ant_id, NULL as ant_val, NULL as field_id, NULL as field_val, NULL as misc_id, NULL as misc_val, NULL as s_inf_id, NULL as s_inf_val, NULL as gloss_id, NULL as gloss_val from ke_pri, k_ele where k_ele.value like ? and k_ele.id = ke_pri.fk UNION ALL select NULL as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, r_ele.id as r_ele_id, r_ele.value as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, NULL as sense_id, NULL as stagk_id, NULL as stagk_val, NULL as stagr_id, NULL as stagr_val, NULL as pos_id, NULL as pos_val, NULL as xref_id, NULL as xref_val, NULL as ant_id, NULL as ant_val, NULL as field_id, NULL as field_val, NULL as misc_id, NULL as misc_val, NULL as s_inf_id, NULL as s_inf_val, NULL as gloss_id, NULL as gloss_val from r_ele, k_ele where k_ele.value like ? and k_ele.fk = r_ele.fk UNION ALL select NULL as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, NULL as r_ele_id, r_ele.value as r_ele_val, re_restr.id as re_restr_id, re_restr.value as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, NULL as sense_id, NULL as stagk_id, NULL as stagk_val, NULL as stagr_id, NULL as stagr_val, NULL as pos_id, NULL as pos_val, NULL as xref_id, NULL as xref_val, NULL as ant_id, NULL as ant_val, NULL as field_id, NULL as field_val, NULL as misc_id, NULL as misc_val, NULL as s_inf_id, NULL as s_inf_val, NULL as gloss_id, NULL as gloss_val from r_ele, re_restr, k_ele where k_ele.value like ? and k_ele.fk = r_ele.fk and re_restr.fk = r_ele.id UNION ALL select NULL as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, NULL as r_ele_id, r_ele.value as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, re_inf.id as re_inf_id, entity.expansion as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, NULL as sense_id, NULL as stagk_id, NULL as stagk_val, NULL as stagr_id, NULL as stagr_val, NULL as pos_id, NULL as pos_val, NULL as xref_id, NULL as xref_val, NULL as ant_id, NULL as ant_val, NULL as field_id, NULL as field_val, NULL as misc_id, NULL as misc_val, NULL as s_inf_id, NULL as s_inf_val, NULL as gloss_id, NULL as gloss_val from r_ele, re_inf, entity, k_ele where k_ele.value like ? and k_ele.fk = r_ele.fk and re_inf.fk = r_ele.id and re_inf.entity = entity.id UNION ALL select NULL as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, NULL as r_ele_id, r_ele.value as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, re_pri.id as re_pri_id, re_pri.value as re_pri_val, NULL as sense_id, NULL as stagk_id, NULL as stagk_val, NULL as stagr_id, NULL as stagr_val, NULL as pos_id, NULL as pos_val, NULL as xref_id, NULL as xref_val, NULL as ant_id, NULL as ant_val, NULL as field_id, NULL as field_val, NULL as misc_id, NULL as misc_val, NULL as s_inf_id, NULL as s_inf_val, NULL as gloss_id, NULL as gloss_val from r_ele, re_pri, k_ele where k_ele.value like ? and k_ele.fk = r_ele.fk and re_pri.fk = r_ele.id UNION ALL select NULL as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, NULL as r_ele_id, NULL as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, sense.id as sense_id, stagk.id as stagk_id, stagk.value as stagk_val, NULL as stagr_id, NULL as stagr_val, NULL as pos_id, NULL as pos_val, NULL as xref_id, NULL as xref_val, NULL as ant_id, NULL as ant_val, NULL as field_id, NULL as field_val, NULL as misc_id, NULL as misc_val, NULL as s_inf_id, NULL as s_inf_val, NULL as gloss_id, NULL as gloss_val from sense, stagk, k_ele where k_ele.value like ? and k_ele.fk = sense.fk and stagk.fk = sense.id UNION ALL select NULL as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, NULL as r_ele_id, NULL as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_id, NULL as stagk_val, stagr.id as stagr_id, stagr.value as stagr_val, NULL as pos_id, NULL as pos_val, NULL as xref_id, NULL as xref_val, NULL as ant_id, NULL as ant_val, NULL as field_id, NULL as field_val, NULL as misc_id, NULL as misc_val, NULL as s_inf_id, NULL as s_inf_val, NULL as gloss_id, NULL as gloss_val from sense, stagr, k_ele where k_ele.value like ? and k_ele.fk = sense.fk and stagr.fk = sense.id UNION ALL select NULL as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, NULL as r_ele_id, NULL as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_id, NULL as stagk_val, NULL as stagr_id, NULL as stagr_val, pos.id as pos_id, entity.expansion as pos_val, NULL as xref_id, NULL as xref_val, NULL as ant_id, NULL as ant_val, NULL as field_id, NULL as field_val, NULL as misc_id, NULL as misc_val, NULL as s_inf_id, NULL as s_inf_val, NULL as gloss_id, NULL as gloss_val from sense, pos, entity, k_ele where k_ele.value like ? and k_ele.fk = sense.fk and pos.fk = sense.id and pos.entity = entity.id UNION ALL select NULL as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, NULL as r_ele_id, NULL as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_id, NULL as stagk_val, NULL as stagr_id, NULL as stagr_val, NULL as pos_id, NULL as pos_val, xref.id as xref_id, xref.value as xref_val, NULL as ant_id, NULL as ant_val, NULL as field_id, NULL as field_val, NULL as misc_id, NULL as misc_val, NULL as s_inf_id, NULL as s_inf_val, NULL as gloss_id, NULL as gloss_val from sense, xref, k_ele where k_ele.value like ? and k_ele.fk = sense.fk and xref.fk = sense.id UNION ALL select NULL as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, NULL as r_ele_id, NULL as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_id, NULL as stagk_val, NULL as stagr_id, NULL as stagr_val, NULL as pos_id, NULL as pos_val, NULL as xref_id, NULL as xref_val, ant.id as ant_id, ant.value as ant_val, NULL as field_id, NULL as field_val, NULL as misc_id, NULL as misc_val, NULL as s_inf_id, NULL as s_inf_val, NULL as gloss_id, NULL as gloss_val from sense, ant, k_ele where k_ele.value like ? and k_ele.fk = sense.fk and ant.fk = sense.id UNION ALL select NULL as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, NULL as r_ele_id, NULL as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_id, NULL as stagk_val, NULL as stagr_id, NULL as stagr_val, NULL as pos_id, NULL as pos_val, NULL as xref_id, NULL as xref_val, NULL as ant_id, NULL as ant_val, field.id as field_id, entity.expansion as field_val, NULL as misc_id, NULL as misc_val, NULL as s_inf_id, NULL as s_inf_val, NULL as gloss_id, NULL as gloss_val from sense, field, entity, k_ele where k_ele.value like ? and k_ele.fk = sense.fk and field.fk = sense.id and field.entity = entity.id UNION ALL select NULL as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, NULL as r_ele_id, NULL as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_id, NULL as stagk_val, NULL as stagr_id, NULL as stagr_val, NULL as pos_id, NULL as pos_val, NULL as xref_id, NULL as xref_val, NULL as ant_id, NULL as ant_val, NULL as field_id, NULL as field_val, misc.id as misc_id, entity.expansion as misc_val, NULL as s_inf_id, NULL as s_inf_val, NULL as gloss_id, NULL as gloss_val from sense, misc, entity, k_ele where k_ele.value like ? and k_ele.fk = sense.fk and misc.fk = sense.id and misc.entity = entity.id UNION ALL select NULL as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, NULL as r_ele_id, NULL as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_id, NULL as stagk_val, NULL as stagr_id, NULL as stagr_val, NULL as pos_id, NULL as pos_val, NULL as xref_id, NULL as xref_val, NULL as ant_id, NULL as ant_val, NULL as field_id, NULL as field_val, NULL as misc_id, NULL as misc_val, s_inf.id as s_inf_id, s_inf.value as s_inf_val, NULL as gloss_id, NULL as gloss_val from sense, s_inf, k_ele where k_ele.value like ? and k_ele.fk = sense.fk and s_inf.fk = sense.id UNION ALL select NULL as kanji, k_ele.id as k_ele_id, NULL as ke_inf_id, NULL as ke_inf_val, NULL as ke_pri_id, NULL as ke_pri_val, NULL as r_ele_id, NULL as r_ele_val, NULL as re_restr_id, NULL as re_restr_val, NULL as re_inf_id, NULL as re_inf_val, NULL as re_pri_id, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_id, NULL as stagk_val, NULL as stagr_id, NULL as stagr_val, NULL as pos_id, NULL as pos_val, NULL as xref_id, NULL as xref_val, NULL as ant_id, NULL as ant_val, NULL as field_id, NULL as field_val, NULL as misc_id, NULL as misc_val, NULL as s_inf_id, NULL as s_inf_val, gloss.id as gloss_id, gloss.value as gloss_val from sense, gloss, k_ele where k_ele.value like ? and k_ele.fk = sense.fk and gloss.fk = sense.id;"
 }

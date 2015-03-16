@@ -120,7 +120,26 @@ Object.size = function(obj) {
     return size;
 };
 
-function addButtons(statsMap) {
+function addButtonsUsingArray(arrayWithKeys, statsMap) {
+    sortedStats = arrayWithKeys.sort(function(a,b) {
+	    return statsMap[b] - statsMap[a];
+    });
+
+    document.getElementById("outputarea").innerHTML = "";
+
+    var testDuplicate = {};
+    for (var index in sortedStats) {
+	if (!testDuplicate[sortedStats[index]]) {
+	    testDuplicate[sortedStats[index]] = 1;
+	} else {
+	    continue;
+	}
+
+	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\');">'+sortedStats[index]+' : '+ statsMap[sortedStats[index]]+'</button>');
+    }
+}
+
+function addButtonsUsingMap(statsMap) {
     sortedStats = Object.keys(statsMap)
 	.sort(function(a,b) {
 	    return statsMap[b] - statsMap[a];
@@ -132,23 +151,46 @@ function addButtons(statsMap) {
     }
 }
 
+function addPermutations(text) {
+    var arrayLength = text.length;
+    for (var i = 0; i < arrayLength; i++) {
+	// another for loop for each letter in the word
+	wordLength = text[i].length;
+	for (var j = 0; j < wordLength; j++) {
+	    //another for loop for each word length
+	    for (var k = 2; (k+j) < wordLength + 1; k++) {
+		text.push(text[i].substr(j,k));
+	    }
+	}
+    }
+    return text.reduce(function (stat, word) {
+        if (!stat[word]) stat[word] = 0;
+        stat[word]++;
+        return stat;
+    }, {});
+}
 var input = document.querySelector('#input');
 
 input.addEventListener('keyup', function () {
     statistics = wordStat(input.value);
-    addButtons(statistics);
+    addButtonsUsingMap(statistics);
 });
 
 var button = document.querySelector('#lookupkanji');
 
 button.addEventListener('click', function () {
-    textToParse = JSON.stringify(input.value);
+    inputText = input.value;
+    splitUpParsedText = inputText.match(/[^ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖ、・。“” ']+/g);
+    splitUpParsedText = addPermutations(splitUpParsedText);
+    reducedParsedText = Object.keys(splitUpParsedText);
+    var textToParse = JSON.stringify(reducedParsedText);
+    console.log(textToParse);
     $.post("/parse", textToParse,
 	   function(data,status){
 	       document.getElementById("definitions").innerHTML = "";
 	       var definitions = document.getElementById('definitions');
-	       results = JSON.parse(data);
-	       addButtons(results);
+	       validKanji = JSON.parse(data);
+	       console.log(validKanji);
+	       addButtonsUsingArray(validKanji, splitUpParsedText);
 	   });
-
 });
