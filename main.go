@@ -116,9 +116,12 @@ func ParseHandler(w http.ResponseWriter, r *http.Request){
 	}
 	defer db.Close()
 
-	parseSQL = parseSQL + makePlaceholders(len(textToParse)) + ");"
+	log.Println("len(textToParse): ",len(textToParse))
+	parseSQLStmt := parseSQL + makePlaceholders(len(textToParse)) + ");"
 
-	stmt, err := db.Prepare(parseSQL)
+	log.Println("After parseSQL: ",parseSQLStmt)
+	log.Println("textToParse: ",textToParse)
+	stmt, err := db.Prepare(parseSQLStmt)
 	if err != nil{
 		log.Fatal(err)
 	}
@@ -181,7 +184,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 		log.Fatal(err)
 	}
 	defer stmt.Close()
-
 	word_definitions := make(map[string]*dictionaryresult)
 	parameter := "%"+ wordtolookup +"%"
 	rows, err := stmt.Query(parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter)

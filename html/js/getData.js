@@ -101,7 +101,7 @@ function appendToTable(result) {
 }
 
 function showDefinitions(kanji) {
-    $('#definitions').empty();
+    document.getElementById("definitions").innerHTML = "";
     var definitions = document.getElementById('definitions');
 
     wordtolookup = JSON.stringify(kanji);
@@ -189,7 +189,6 @@ button.addEventListener('click', function () {
     console.log(textToParse);
     $.post("/parse", textToParse,
 	   function(data,status){
-	       document.getElementById("definitions").innerHTML = "";
 	       var definitions = document.getElementById('definitions');
 	       validKanji = JSON.parse(data);
 	       console.log(validKanji);
