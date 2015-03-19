@@ -1,9 +1,9 @@
 function isJapanese(letter) {
-        return (letter > '\u4dff' && letter < '\u9faf') || (letter > '\u33ff' && letter < '\u4dc0');
+        return ((letter > '\u4dff' && letter < '\u9faf') || (letter > '\u33ff' && letter < '\u4dc0'));
 }
 
 function wordStat(text) {
-    return text.split('').filter(function(letter){
+    return text.split('').filter(function(letter) {
         return isJapanese(letter);
     }).reduce(function (stat, word) {
         if (!stat[word]) stat[word] = 0;
@@ -188,7 +188,8 @@ button.addEventListener('click', function () {
     var textToParse = JSON.stringify(reducedParsedText);
     console.log(textToParse);
     $.post("/parse", textToParse,
-	   function(data,status){
+	   function(data,status) {
+	       document.getElementById("definitions").innerHTML = "";
 	       var definitions = document.getElementById('definitions');
 	       validKanji = JSON.parse(data);
 	       console.log(validKanji);

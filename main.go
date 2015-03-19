@@ -169,8 +169,8 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 	var wordtolookup string
 	err := decoder.Decode(&wordtolookup)
 	if err != nil {
-		log.Println("I tried")
 		log.Println(r.Body)
+		log.Fatal(err)
 	}
 
 	db, err := sql.Open("sqlite3", "jmdict.db")
@@ -185,8 +185,55 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 	}
 	defer stmt.Close()
 	word_definitions := make(map[string]*dictionaryresult)
-	parameter := "%"+ wordtolookup +"%"
-	rows, err := stmt.Query(parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter,parameter)
+	kanjiToLookUp := "%"+ wordtolookup +"%"
+	rows, err := stmt.Query(kanjiToLookUp)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var k_ele_ids, r_ele_ids []string
+	for rows.Next() {
+		var k_ele_id_key, kanji, r_ele_id_key, kana string
+		var k_ele_id, r_ele_id int
+
+		err := rows.Scan(&k_ele_id, &kanji, &r_ele_id, &kana)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		k_ele_id_key = strconv.Itoa(k_ele_id)
+		r_ele_id_key = strconv.Itoa(r_ele_id)
+
+		k_ele_ids = append(k_ele_ids, k_ele_id_key)
+		r_ele_ids = append(r_ele_ids, r_ele_id_key)
+
+		if word_definitions[k_ele_id_key] == nil {
+			word_definitions[k_ele_id_key] = NewDictionaryResult()
+			word_definitions[k_ele_id_key].K_ele.Kanji = kanji
+		}
+
+		if word_definitions[k_ele_id_key].R_ele[kana] == nil {
+			word_definitions[k_ele_id_key].R_ele[kana] = &Releinfo{}
+		}
+	}
+
+	// second sql query
+	stmt, err := db.Prepare(sqlstring)
+	if err != nil{
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	k_id_holders := makePlaceholders(len(k_ele_ids))
+	r_id_holders := makePlaceholders(len(r_ele_ids))
+
+	// form sql query by replacing (?) with above holders
+	kr_inf_sql := strings.Replace(secondSQL, "(k)", k_id_holders, -1)
+	kr_inf_sql := strings.Replace(kr_inf_sql, "(r)", r_id_holders, -1)
+
+	// should have 14 inputs
+	rows, err := stmt.Query(k_ele_ids...,r_ele_ids...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -195,11 +242,11 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 	for rows.Next() {
 		var k_ele_id_key, sense_id_value string
 		var k_ele_id int
-		var kanji, ke_pri_val, r_ele_val, re_restr_val, re_pri_val, stagk_val, stagr_val, xref_val, ant_val, s_inf_val, gloss_val sql.NullString
+		var ke_pri_val, r_ele_val, re_restr_val, re_pri_val, stagk_val, stagr_val, xref_val, ant_val, s_inf_val, gloss_val sql.NullString
 		var ke_inf_val, re_inf_val, field_val, misc_val, pos_val sql.NullString
 		var ke_inf_id,  ke_pri_id, r_ele_id, re_restr_id, re_inf_id, re_pri_id, sense_id, stagk_id, stagr_id, pos_id, xref_id, ant_id, field_id, misc_id, s_inf_id, gloss_id sql.NullInt64
 
-		err := rows.Scan(&kanji,&k_ele_id,&ke_inf_id,&ke_inf_val,&ke_pri_id,&ke_pri_val,&r_ele_id,&r_ele_val,&re_restr_id,&re_restr_val,&re_inf_id,&re_inf_val,&re_pri_id,&re_pri_val,&sense_id,&stagk_id,&stagk_val,&stagr_id,&stagr_val,&pos_id,&pos_val,&xref_id,&xref_val,&ant_id,&ant_val,&field_id,&field_val,&misc_id,&misc_val,&s_inf_id,&s_inf_val,&gloss_id,&gloss_val)
+		err := rows.Scan(&k_ele_id,&ke_inf_val,&ke_pri_val,&r_ele_val,&re_restr_val,&re_inf_val,&re_pri_val,&sense_id,&stagk_val,&stagr_val,&pos_val,&xref_val,&ant_val,&field_val,&misc_val,&s_inf_val,&gloss_val)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -208,21 +255,11 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 
 		k_ele_id_key = strconv.Itoa(k_ele_id)
 
-		if word_definitions[k_ele_id_key] == nil {
-			word_definitions[k_ele_id_key] = NewDictionaryResult()
-			word_definitions[k_ele_id_key].K_ele.Kanji = kanji.String
-		}
-
+		// use sense_id to differentiate from eachother
 		if sense_id.Valid {
 			sense_id_value = strconv.FormatInt(sense_id.Int64, 10)
 			if word_definitions[k_ele_id_key].Sense[sense_id_value] == nil {
 				word_definitions[k_ele_id_key].Sense[sense_id_value] = &Senseinfo{}
-			}
-		}
-
-		if r_ele_val.Valid {
-			if word_definitions[k_ele_id_key].R_ele[r_ele_val.String] == nil {
-				word_definitions[k_ele_id_key].R_ele[r_ele_val.String] = &Releinfo{}
 			}
 		}
 
@@ -258,7 +295,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 
 		}
 	}
-
 
 	// log.Println(word_definitions)
 	jsontext, err := json.Marshal(word_definitions)
