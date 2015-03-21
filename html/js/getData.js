@@ -103,8 +103,9 @@ function appendToTable(result) {
 function showDefinitions(kanji, page) {
     document.getElementById("definitions").innerHTML = "";
     var definitions = document.getElementById('definitions');
-
-    wordtolookup = JSON.stringify(kanji);
+    var pageOf = {};
+    pageOf[kanji] = page;
+    wordtolookup = JSON.stringify(pageOf);
     $.post("/post", wordtolookup,
 	   function(data,status) {
 	       results = JSON.parse(data);
@@ -137,7 +138,7 @@ function addButtonsUsingArray(arrayWithKeys, statsMap) {
 	    continue;
 	}
 
-	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\',0);">'+sortedStats[index]+' : '+ statsMap[sortedStats[index]]+'</button>');
+	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\',\'0\');">'+sortedStats[index]+' : '+ statsMap[sortedStats[index]]+'</button>');
     }
 }
 
@@ -149,7 +150,7 @@ function addButtonsUsingMap(statsMap) {
 
     document.getElementById("outputarea").innerHTML = "";
     for (var index in sortedStats) {
-	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\',0);">'+sortedStats[index]+' : '+statsMap[sortedStats[index]]+'</button>');
+	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\',\'0\');">'+sortedStats[index]+' : '+statsMap[sortedStats[index]]+'</button>');
     }
 }
 
