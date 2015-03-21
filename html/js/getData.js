@@ -12,7 +12,7 @@ function wordStat(text) {
     }, {});
 }
 
-function appendToTable(result) {
+function appendToTable(results) {
     var odd = true;
     for (var row in results) {
 	for (var kana in results[row]['R_ele']) {
@@ -103,13 +103,13 @@ function appendToTable(result) {
 function showDefinitions(kanji, page) {
     document.getElementById("definitions").innerHTML = "";
     var definitions = document.getElementById('definitions');
-    var pageOf = {};
-    pageOf[kanji] = page;
-    wordtolookup = JSON.stringify(pageOf);
+    var whatToLookUp = {"kanji":kanji, "page":page};
+    // pageOf[kanji] = page;
+    wordtolookup = JSON.stringify(whatToLookUp);
     $.post("/post", wordtolookup,
 	   function(data,status) {
 	       results = JSON.parse(data);
-	       appendToTable(results);
+	       appendToTable(results.Definitions);
 	   });
 }
 
