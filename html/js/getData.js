@@ -100,7 +100,7 @@ function appendToTable(result) {
     }
 }
 
-function showDefinitions(kanji) {
+function showDefinitions(kanji, page) {
     document.getElementById("definitions").innerHTML = "";
     var definitions = document.getElementById('definitions');
 
@@ -137,7 +137,7 @@ function addButtonsUsingArray(arrayWithKeys, statsMap) {
 	    continue;
 	}
 
-	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\');">'+sortedStats[index]+' : '+ statsMap[sortedStats[index]]+'</button>');
+	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\',0);">'+sortedStats[index]+' : '+ statsMap[sortedStats[index]]+'</button>');
     }
 }
 
@@ -149,11 +149,12 @@ function addButtonsUsingMap(statsMap) {
 
     document.getElementById("outputarea").innerHTML = "";
     for (var index in sortedStats) {
-	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\');">'+sortedStats[index]+' : '+statsMap[sortedStats[index]]+'</button>');
+	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\',0);">'+sortedStats[index]+' : '+statsMap[sortedStats[index]]+'</button>');
     }
 }
 
 function addPermutations(text) {
+    var parsedtext = [];
     var arrayLength = text.length;
     for (var i = 0; i < arrayLength; i++) {
 	// another for loop for each letter in the word
@@ -161,11 +162,11 @@ function addPermutations(text) {
 	for (var j = 0; j < wordLength; j++) {
 	    //another for loop for each word length
 	    for (var k = 2; (k+j) < wordLength + 1; k++) {
-		text.push(text[i].substr(j,k));
+		parsedtext.push(text[i].substr(j,k));
 	    }
 	}
     }
-    return text.reduce(function (stat, word) {
+    return parsedtext.reduce(function (stat, word) {
         if (!stat[word]) stat[word] = 0;
         stat[word]++;
         return stat;
@@ -186,13 +187,13 @@ button.addEventListener('click', function () {
     splitUpParsedText = addPermutations(splitUpParsedText);
     reducedParsedText = Object.keys(splitUpParsedText);
     var textToParse = JSON.stringify(reducedParsedText);
-    console.log(textToParse);
+    // console.log(textToParse);
     $.post("/parse", textToParse,
 	   function(data,status) {
 	       document.getElementById("definitions").innerHTML = "";
 	       var definitions = document.getElementById('definitions');
 	       validKanji = JSON.parse(data);
-	       console.log(validKanji);
+	       // console.log(validKanji);
 	       addButtonsUsingArray(validKanji, splitUpParsedText);
 	   });
 });
