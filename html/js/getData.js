@@ -13,16 +13,17 @@ function wordStat(text) {
 }
 
 function appendToTable(results) {
+    var definitions = document.getElementById('definitions');
     var odd = true;
     for (var row in results) {
-	for (var kana in results[row]['R_ele']) {
+	for (var kana in results[row].R_ele) {
 	    var tr = document.createElement('tr'),
 		kanji_td = document.createElement('td'),
 		kana_td = document.createElement('td'),
 		meanings_td = document.createElement('td'),
 		span = document.createElement('span'),
 		spanLower = document.createElement('span'),
-		kanji_text = document.createTextNode(results[row]['K_ele'].Kanji),
+		kanji_text = document.createTextNode(results[row].K_ele.Kanji),
 		kana_text = document.createTextNode(kana),
 		lowertr = document.createElement('tr'),
 		lowertd = document.createElement('td'),
@@ -46,15 +47,15 @@ function appendToTable(results) {
 	    // Meanings column
 	    meanings_td.className = 'meanings_column';
 	    var definitionNum = 1,
-		numberOfDefinitions = Object.size(results[row]['Sense']),
+		numberOfDefinitions = Object.size(results[row].Sense),
 		numberTheList = (numberOfDefinitions > 1);
-	    var isCommonWord = (results[row]['K_ele'].Ke_pri != null) ? (results[row]['K_ele'].Ke_pri.length > 0) : false;
+	    var isCommonWord = (results[row].K_ele.Ke_pri != null) ? (results[row].K_ele.Ke_pri.length > 0) : false;
 	    var pos_text = [];
 
-	    for (var meaning in results[row]['Sense']) {
-		var meaning_text = document.createTextNode(results[row]['Sense'][meaning].Gloss.join('; '));
-		if (results[row]['Sense'][meaning].Pos != null)
-		    pos_text = pos_text.concat(results[row]['Sense'][meaning].Pos);
+	    for (var meaning in results[row].Sense) {
+		var meaning_text = document.createTextNode(results[row].Sense[meaning].Gloss.join('; '));
+		if (results[row].Sense[meaning].Pos != null)
+		    pos_text = pos_text.concat(results[row].Sense[meaning].Pos);
 
 		if (numberTheList) {
 		    var number = document.createElement('strong');
@@ -63,11 +64,11 @@ function appendToTable(results) {
 		}
 
 		meanings_td.appendChild(meaning_text);
-		if (results[row]['Sense'][meaning].Field != null) {
-		    var numFields = results[row]['Sense'][meaning].Field.length,
+		if (results[row].Sense[meaning].Field != null) {
+		    var numFields = results[row].Sense[meaning].Field.length,
 			fields_text = "";
 		    for (var i = 0; i < numFields; i++) {
-			fields_text += " ("+ results[row]['Sense'][meaning].Field[i] + ")";
+			fields_text += " ("+ results[row].Sense[meaning].Field[i] + ")";
 		    }
 		    meanings_td.appendChild(document.createTextNode(fields_text));
 		}
@@ -84,7 +85,7 @@ function appendToTable(results) {
 		spanLower.appendChild(spanCommon);
 	    }
 	    spanLower.className = 'tags';
-	    lowertd_text = document.createTextNode(pos_text.join(', '));
+	    var lowertd_text = document.createTextNode(pos_text.join(', '));
 	    spanLower.appendChild(lowertd_text);
 	    lowertr.className = tr.className + " lower";
 	    lowertd.colSpan = 2;
@@ -100,15 +101,34 @@ function appendToTable(results) {
     }
 }
 
+function appendPageButtons(numButtons) {
+    var i = 1;
+    while (numButtons > 0) {
+	$("#pageButton").append("<button type='button' id='page"+i+"' value=\"\" onclick=\"showDefinitions('"+ kanji +"','"+ i +"')\">"+i+"</button>");
+	i++;
+	numButtons--;
+    }
+
+}
+
 function showDefinitions(kanji, page) {
     document.getElementById("definitions").innerHTML = "";
-    var definitions = document.getElementById('definitions');
     var whatToLookUp = {"kanji":kanji, "page":page};
     // pageOf[kanji] = page;
-    wordtolookup = JSON.stringify(whatToLookUp);
+    var wordtolookup = JSON.stringify(whatToLookUp);
     $.post("/post", wordtolookup,
 	   function(data,status) {
-	       results = JSON.parse(data);
+	       var results = JSON.parse(data);
+	       if (kanjiOnPage != kanji) {
+		   var pageButtonDiv = document.getElementById("pageButton");
+		   pageButtonDiv.innerHTML = "";
+		   currPage = page;
+		   kanjiOnPage = kanji;
+		   if (results.NumDefinitionsTotal > 15) {
+		       var numButtons = results.NumDefinitionsTotal / 15;
+		       appendPageButtons(numButtons);
+		   }
+	       }
 	       appendToTable(results.Definitions);
 	   });
 }
@@ -122,7 +142,7 @@ Object.size = function(obj) {
 };
 
 function addButtonsUsingArray(arrayWithKeys, statsMap) {
-    sortedStats = arrayWithKeys.sort(function(a,b) {
+    var sortedStats = arrayWithKeys.sort(function(a,b) {
 	if (statsMap[b] - statsMap[a] == 0)
 	    return b.length - a.length;
 	return statsMap[b] - statsMap[a];
@@ -143,7 +163,7 @@ function addButtonsUsingArray(arrayWithKeys, statsMap) {
 }
 
 function addButtonsUsingMap(statsMap) {
-    sortedStats = Object.keys(statsMap)
+    var sortedStats = Object.keys(statsMap)
 	.sort(function(a,b) {
 	    return statsMap[b] - statsMap[a];
 	});
@@ -159,7 +179,7 @@ function addPermutations(text) {
     var arrayLength = text.length;
     for (var i = 0; i < arrayLength; i++) {
 	// another for loop for each letter in the word
-	wordLength = text[i].length;
+	var wordLength = text[i].length;
 	for (var j = 0; j < wordLength; j++) {
 	    //another for loop for each word length
 	    for (var k = 2; (k+j) < wordLength + 1; k++) {
@@ -173,27 +193,30 @@ function addPermutations(text) {
         return stat;
     }, {});
 }
+
 var input = document.querySelector('#input');
+var currPage = "";
+var kanjiOnPage = "";
 
 input.addEventListener('keyup', function () {
-    statistics = wordStat(input.value);
+    var statistics = wordStat(input.value);
     addButtonsUsingMap(statistics);
 });
 
 var button = document.querySelector('#lookupkanji');
 
 button.addEventListener('click', function () {
-    inputText = input.value;
-    splitUpParsedText = inputText.match(/[^ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖ、・。“” ']+/g);
+    var inputText = input.value;
+    var splitUpParsedText = inputText.match(/[^ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖ、・。“” ']+/g);
     splitUpParsedText = addPermutations(splitUpParsedText);
-    reducedParsedText = Object.keys(splitUpParsedText);
+    var reducedParsedText = Object.keys(splitUpParsedText);
     var textToParse = JSON.stringify(reducedParsedText);
     // console.log(textToParse);
     $.post("/parse", textToParse,
 	   function(data,status) {
-	       document.getElementById("definitions").innerHTML = "";
+	       // document.getElementById("definitions").innerHTML = "";
 	       var definitions = document.getElementById('definitions');
-	       validKanji = JSON.parse(data);
+	       var validKanji = JSON.parse(data);
 	       // console.log(validKanji);
 	       addButtonsUsingArray(validKanji, splitUpParsedText);
 	   });
