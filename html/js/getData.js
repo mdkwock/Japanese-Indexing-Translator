@@ -101,6 +101,14 @@ function appendToTable(results) {
     }
 }
 
+function appendDashButton() {
+    $("#pageButton").append("&#32;&#32;&#32;&mdash;&#32;&#32;&#32;");
+}
+
+function appendPageButton(pageNum, kanji) {
+    $("#pageButton").append("<button type='button' id='page"+pageNum+"' value=\"\" onclick=\"showDefinitions('"+ kanji +"',"+ (pageNum-1) +")\">"+pageNum+"</button>");
+}
+
 function appendPageButtons(numDefinitions, currentPage, kanji) {
     var numButtons = Math.ceil(numDefinitions / 15);
     // TODO add previous page button
@@ -108,7 +116,7 @@ function appendPageButtons(numDefinitions, currentPage, kanji) {
     // normally add buttons if there aren't that many ( < 8)
     if (numButtons < 8) {
 	while (numButtons > 0) {
-	    $("#pageButton").append("<button type='button' id='page"+i+"' value=\"\" onclick=\"showDefinitions('"+ kanji +"','"+ (i-1) +"')\">"+i+"</button>");
+	    appendPageButton(i,kanji);
 	    i++;
 	    numButtons--;
 	}
@@ -118,34 +126,37 @@ function appendPageButtons(numDefinitions, currentPage, kanji) {
 	// currentPage is near the 1st page
 	if (currentPage < 7) {
 	    while (i < 7) {
-		$("#pageButton").append("<button type='button' id='page"+i+"' value=\"\" onclick=\"showDefinitions('"+ kanji +"','"+ (i-1) +"')\">"+i+"</button>");
+		appendPageButton(i,kanji);
 		i++;
 	    }
 	    // TODO add a next button here or something
-	    $("#pageButton").append("<button type='button' id='page"+numButtons+"' value=\"\" onclick=\"showDefinitions('"+ kanji +"','"+ (numButtons-1) +"')\">"+i+"</button>");
+	    appendDashButton();
+	    appendPageButton(numButtons, kanji);
 	}
 	// currentPage is near the last page
 	else if (currentPage > (numButtons - 7)) {
-	    $("#pageButton").append("<button type='button' id='page"+i+"' value=\"\" onclick=\"showDefinitions('"+ kanji +"','"+ (i-1) +"')\">"+i+"</button>");
+	    appendPageButton(i, kanji);
+	    appendDashButton();
 	    i = numButtons - 7;
 	    while (i <= numButtons) {
-		$("#pageButton").append("<button type='button' id='page"+i+"' value=\"\" onclick=\"showDefinitions('"+ kanji +"','"+ (i-1) +"')\">"+i+"</button>");
+		appendPageButton(i,kanji);
 		i++;
 	    }
 	    // TODO add next page button
 	}
 	// current page is not near 1st or last page but near the middle
 	else {
-	    $("#pageButton").append("<button type='button' id='page"+i+"' value=\"\" onclick=\"showDefinitions('"+ kanji +"','"+ (i-1) +"')\">"+i+"</button>");
+	    appendPageButton(i, kanji);
+	    appendDashButton();
 	    // TODO append scroller button
-
 	    i = currentPage - 2;
 	    while (i < currentPage+3) {
-		$("#pageButton").append("<button type='button' id='page"+i+"' value=\"\" onclick=\"showDefinitions('"+ kanji +"','"+ (i-1) +"')\">"+i+"</button>");
+		appendPageButton(i, kanji);
+		i++;
 	    }
-
+	    appendDashButton();
 	    // TODO append scroller button
-	    $("#pageButton").append("<button type='button' id='page"+numButtons+"' value=\"\" onclick=\"showDefinitions('"+ kanji +"','"+ (numButtons-1) +"')\">"+numButtons+"</button>");
+	    appendPageButton(numButtons, kanji);
 	    // TODO append next page button
 	}
     }
@@ -160,22 +171,25 @@ function showDefinitions(kanji, page) {
 	   function(data,status) {
 	       var results = JSON.parse(data);
 
+	       var pageButtonDiv = document.getElementById("pageButton");
 	       // if there is more than 1 page add page buttons
 	       if (results.NumDefinitionsTotal > 15) {
 		   // different kanji, load all the page buttons for the first time
 		   if (kanjiOnPage != kanji) {
-		       var pageButtonDiv = document.getElementById("pageButton");
 		       pageButtonDiv.innerHTML = "";
 		       currPage = page + 1;
 		       kanjiOnPage = kanji;
 		       appendPageButtons(results.NumDefinitionsTotal, currPage, kanji);
-
 		   }
 		   // Same kanji but load different page
 		   // (change the way the page buttons look but same buttons)
 		   else {
-
+		       currPage = page+1;
+		       reformatPageButtons(currPage,kanji);
 		   }
+	       } // erase previously loaded buttons
+	       else {
+		   pageButtonDiv.innerHTML = "";
 	       }
 	       appendToTable(results.Definitions);
 	   });
@@ -206,7 +220,7 @@ function addButtonsUsingArray(arrayWithKeys, statsMap) {
 	    continue;
 	}
 
-	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\',\'0\');">'+sortedStats[index]+' : '+ statsMap[sortedStats[index]]+'</button>');
+	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\',0);">'+sortedStats[index]+' : '+ statsMap[sortedStats[index]]+'</button>');
     }
 }
 
@@ -218,7 +232,7 @@ function addButtonsUsingMap(statsMap) {
 
     document.getElementById("outputarea").innerHTML = "";
     for (var index in sortedStats) {
-	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\',\'0\');">'+sortedStats[index]+' : '+statsMap[sortedStats[index]]+'</button>');
+	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\',0);">'+sortedStats[index]+' : '+statsMap[sortedStats[index]]+'</button>');
     }
 }
 
@@ -243,7 +257,7 @@ function addPermutations(text) {
 }
 
 var input = document.querySelector('#input');
-var currPage = "";
+var currPage = 0;
 var kanjiOnPage = "";
 
 input.addEventListener('keyup', function () {

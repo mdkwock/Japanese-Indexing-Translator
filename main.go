@@ -54,7 +54,7 @@ type dictionaryresult struct {
 
 type LookUpInfo struct {
 	Kanji string `json:"kanji"`
-	Page  string `json:"page"`
+	Page  int    `json:"page"`
 }
 
 func NewDictionaryResult() *dictionaryresult {
@@ -226,7 +226,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 	}
 
 	// Query with LIMIT using pages
-	first_sql := strings.Replace(first_sql_string, "page", lookUpInfo.Page, 1)
+	first_sql := strings.Replace(first_sql_string, "page", strconv.Itoa(lookUpInfo.Page), 1)
 	stmt, err = db.Prepare(first_sql)
 	if err != nil {
 		log.Fatal(err)
