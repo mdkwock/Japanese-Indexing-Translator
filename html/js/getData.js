@@ -145,70 +145,56 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 		appendPageButton(numButtons, kanji);
 	    }
 	}
-    }    // current page is not near 1st or last page but near the middle
+    }    // current page is not near 1st page but near the middle or last
     else {
-	currentPage = $('button:disabled').prop('id').slice(-1);
-// turn currentPage into an int
-	//
-	if (currentPage < 5 && newPage > 4) //todo
-	appendPageButton(i, kanji);
-	appendDashButton();
-	// TODO append scroller button
-	i = newPage - 2;
-	while (i < newPage+3) {
-	    appendPageButton(i, kanji);
-	    i++;
-	}
-	appendDashButton();
-	// TODO append scroller button
-	appendPageButton(numButtons, kanji);
-	// TODO append next page button
-
-	// newPage is near the last page
-	if (newPage > (numButtons - 7)) {
-	    appendPageButton(i, kanji);
-	    appendDashButton();
-	    i = numButtons - 7;
-	    while (i <= numButtons) {
-		appendPageButton(i,kanji);
-		i++;
+	currentPage = parseInt($('button:disabled').prop('id').slice(-1));
+	// turn currentPage into an int
+	// page buttons don't need to be reloaded, just change the highlighted button
+	if ((currentPage < 5 && newPage < 5) || (currentPage > (numButtons - 5) && newPage > (numButtons - 5))) {
+	    $('button:disabled').attr('disabled',false);
+	    $('#page'+newPage).attr('disabled',true);
+	} // reformat the buttons
+	else {
+	    if (newPage < numButtons-5) {
+		pageButtonDiv.innerHTML = "";
+		appendPageButton(i, kanji);
+		appendDashButton();
+		// TODO append scroller button
+		i = newPage - 2;
+		while (i < newPage+3) {
+		    appendPageButton(i, kanji);
+		    i++;
+		}
+		appendDashButton();
+		// TODO append scroller button
+		appendPageButton(numButtons, kanji);
+		// TODO append next page button
+		$('button:disabled').attr('disabled',false);
+		$('#page'+newPage).attr('disabled',true);
 	    }
-	    // TODO add next page button
+	    // newPage is near the last page
+	    else if (newPage > (numButtons - 7)) {
+		appendPageButton(i, kanji);
+		appendDashButton();
+		i = numButtons - 7;
+		while (i <= numButtons) {
+		    appendPageButton(i,kanji);
+		    i++;
+		}
+		// TODO add next page button
+	    }
 	}
     }
-
 }
 
 function showDefinitions(kanji, page) {
-    document.getElementById("definitions").innerHTML = "";
     var whatToLookUp = {"kanji":kanji, "page":page};
-    // pageOf[kanji] = page;
     var wordtolookup = JSON.stringify(whatToLookUp);
     $.post("/post", wordtolookup,
 	   function(data,status) {
 	       var results = JSON.parse(data);
-
+	       document.getElementById("definitions").innerHTML = "";
 	       applyPageButtons(results.NumDefinitionsTotal, page, kanji);
-	       // var pageButtonDiv = document.getElementById("pageButton");
-	       // // if there is more than 1 page add page buttons
-	       // if (results.NumDefinitionsTotal > 15) {
-	       // 	   // different kanji, load all the page buttons for the first time
-	       // 	   if (kanjiOnPage != kanji) {
-	       // 	       pageButtonDiv.innerHTML = "";
-	       // 	       currPage = page + 1;
-	       // 	       kanjiOnPage = kanji;
-	       // 	       appendPageButtons(results.NumDefinitionsTotal, currPage, kanji);
-	       // 	   }
-	       // 	   // Same kanji but load different page
-	       // 	   // (change the way the page buttons look but same buttons)
-	       // 	   else {
-	       // 	       currPage = page+1;
-	       // 	       reformatPageButtons(currPage,kanji);
-	       // 	   }
-	       // } // erase previously loaded buttons
-	       // else {
-	       // 	   pageButtonDiv.innerHTML = "";
-	       // }
 	       appendToTable(results.Definitions);
 	   });
 }
