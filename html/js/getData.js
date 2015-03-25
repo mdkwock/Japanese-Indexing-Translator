@@ -133,6 +133,7 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 		i++;
 		numButtons--;
 	    }
+	    $('#page1').attr('disabled',true);
 	}    // buttons need some special formatting so we don't print out too many buttons
 	else {
 	    if (newPage < 7) {
@@ -140,6 +141,7 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 		    appendPageButton(i,kanji);
 		    i++;
 		}
+		$('#page1').attr('disabled',true);
 		// TODO add a next button here or something
 		appendDashButton();
 		appendPageButton(numButtons, kanji);
@@ -181,6 +183,7 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 		    appendPageButton(i,kanji);
 		    i++;
 		}
+		$('#page'+newPage).attr('disabled',true);
 		// TODO add next page button
 	    }
 	}
