@@ -109,32 +109,63 @@ function appendPageButton(pageNum, kanji) {
     $("#pageButton").append("<button type='button' id='page"+pageNum+"' value=\"\" onclick=\"showDefinitions('"+ kanji +"',"+ (pageNum-1) +")\">"+pageNum+"</button>");
 }
 
-function appendPageButtons(numDefinitions, currentPage, kanji) {
-    var numButtons = Math.ceil(numDefinitions / 15);
-    // TODO add previous page button
-    var i = 1;
-    // normally add buttons if there aren't that many ( < 8)
-    if (numButtons < 8) {
-	while (numButtons > 0) {
-	    appendPageButton(i,kanji);
-	    i++;
-	    numButtons--;
-	}
+function applyPageButtons(numDefinitions, newPage, kanji) {
+    var pageButtonDiv = document.getElementById("pageButton");
+
+    if (numDefinitions < 15) {
+	pageButtonDiv.innerHTML = "";
+	return;
     }
-    // buttons need some special formatting so we don't print out too many buttons
-    else {
-	// currentPage is near the 1st page
-	if (currentPage < 7) {
-	    while (i < 7) {
+    newPage = newPage + 1;
+    var numButtons = Math.ceil(numDefinitions / 15);
+
+    if (kanjiOnPage != kanji) {
+	pageButtonDiv.innerHTML = "";
+	kanjiOnPage = kanji;
+
+	// TODO add previous page button
+	// TODO disable page 1
+	var i = 1;
+	// normally add buttons if there aren't that many ( < 8)
+	if (numButtons < 8) {
+	    while (numButtons > 0) {
 		appendPageButton(i,kanji);
 		i++;
+		numButtons--;
 	    }
-	    // TODO add a next button here or something
-	    appendDashButton();
-	    appendPageButton(numButtons, kanji);
+	}    // buttons need some special formatting so we don't print out too many buttons
+	else {
+	    if (newPage < 7) {
+		while (i < 7) {
+		    appendPageButton(i,kanji);
+		    i++;
+		}
+		// TODO add a next button here or something
+		appendDashButton();
+		appendPageButton(numButtons, kanji);
+	    }
 	}
-	// currentPage is near the last page
-	else if (currentPage > (numButtons - 7)) {
+    }    // current page is not near 1st or last page but near the middle
+    else {
+	currentPage = $('button:disabled').prop('id').slice(-1);
+// turn currentPage into an int
+	//
+	if (currentPage < 5 && newPage > 4) //todo
+	appendPageButton(i, kanji);
+	appendDashButton();
+	// TODO append scroller button
+	i = newPage - 2;
+	while (i < newPage+3) {
+	    appendPageButton(i, kanji);
+	    i++;
+	}
+	appendDashButton();
+	// TODO append scroller button
+	appendPageButton(numButtons, kanji);
+	// TODO append next page button
+
+	// newPage is near the last page
+	if (newPage > (numButtons - 7)) {
 	    appendPageButton(i, kanji);
 	    appendDashButton();
 	    i = numButtons - 7;
@@ -144,22 +175,8 @@ function appendPageButtons(numDefinitions, currentPage, kanji) {
 	    }
 	    // TODO add next page button
 	}
-	// current page is not near 1st or last page but near the middle
-	else {
-	    appendPageButton(i, kanji);
-	    appendDashButton();
-	    // TODO append scroller button
-	    i = currentPage - 2;
-	    while (i < currentPage+3) {
-		appendPageButton(i, kanji);
-		i++;
-	    }
-	    appendDashButton();
-	    // TODO append scroller button
-	    appendPageButton(numButtons, kanji);
-	    // TODO append next page button
-	}
     }
+
 }
 
 function showDefinitions(kanji, page) {
@@ -171,26 +188,27 @@ function showDefinitions(kanji, page) {
 	   function(data,status) {
 	       var results = JSON.parse(data);
 
-	       var pageButtonDiv = document.getElementById("pageButton");
-	       // if there is more than 1 page add page buttons
-	       if (results.NumDefinitionsTotal > 15) {
-		   // different kanji, load all the page buttons for the first time
-		   if (kanjiOnPage != kanji) {
-		       pageButtonDiv.innerHTML = "";
-		       currPage = page + 1;
-		       kanjiOnPage = kanji;
-		       appendPageButtons(results.NumDefinitionsTotal, currPage, kanji);
-		   }
-		   // Same kanji but load different page
-		   // (change the way the page buttons look but same buttons)
-		   else {
-		       currPage = page+1;
-		       reformatPageButtons(currPage,kanji);
-		   }
-	       } // erase previously loaded buttons
-	       else {
-		   pageButtonDiv.innerHTML = "";
-	       }
+	       applyPageButtons(results.NumDefinitionsTotal, page, kanji);
+	       // var pageButtonDiv = document.getElementById("pageButton");
+	       // // if there is more than 1 page add page buttons
+	       // if (results.NumDefinitionsTotal > 15) {
+	       // 	   // different kanji, load all the page buttons for the first time
+	       // 	   if (kanjiOnPage != kanji) {
+	       // 	       pageButtonDiv.innerHTML = "";
+	       // 	       currPage = page + 1;
+	       // 	       kanjiOnPage = kanji;
+	       // 	       appendPageButtons(results.NumDefinitionsTotal, currPage, kanji);
+	       // 	   }
+	       // 	   // Same kanji but load different page
+	       // 	   // (change the way the page buttons look but same buttons)
+	       // 	   else {
+	       // 	       currPage = page+1;
+	       // 	       reformatPageButtons(currPage,kanji);
+	       // 	   }
+	       // } // erase previously loaded buttons
+	       // else {
+	       // 	   pageButtonDiv.innerHTML = "";
+	       // }
 	       appendToTable(results.Definitions);
 	   });
 }
