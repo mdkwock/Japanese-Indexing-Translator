@@ -137,6 +137,40 @@ body {
     background-color: #D8EBFD;
 }
 
+.pageButton {
+    font-family: arial;
+    font-size: 12px;
+    font-weight: 500;
+    padding: .5em 1em;
+    color: #444;
+    color: rgba(0,0,0,.8);
+    border: 1px solid #999;
+    border: 0 rgba(0,0,0,0);
+    background-color: rgba(239, 239, 239, 0.19);
+    text-decoration: none;
+    border-radius: 2px;
+    display: inline-block;
+    zoom: 1;
+    line-height: normal;
+    white-space: nowrap;
+    vertical-align: middle;
+    text-align: center;
+    cursor: pointer;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    box-shadow: 0 0 0 .5px rgba(0, 0, 0, 0) inset,0 0 3px rgba(0, 0, 0, 0.56) inset;
+}
+
+.pageButton:hover {
+    background-color: #FFF;
+}
+
 .flat-button {
   position: relative;
   vertical-align: top;

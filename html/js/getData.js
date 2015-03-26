@@ -105,8 +105,20 @@ function appendDashButton() {
     $("#pageButton").append("&#32;&#32;&#32;&mdash;&#32;&#32;&#32;");
 }
 
+function appendPrevPageButton(kanji, currentPage) {
+    prevPage = currentPage - 1;
+    if(prevPage > 1)
+	$("#pageButton").append("<a id='prev' class='pageButton' onclick=\"showDefinitions('"+ kanji +"',"+ (prevPage-1) +")\"><<</a>");
+}
+
+function appendNextPageButton(kanji, currentPage, totalPages) {
+    nextPage = currentPage + 1;
+    if(nextPage < totalPages)
+	$("#pageButton").append("<a id='next' class='pageButton' onclick=\"showDefinitions('"+ kanji +"',"+ (nextPage-1) +")\">>></a>");
+}
+
 function appendPageButton(pageNum, kanji) {
-    $("#pageButton").append("<button type='button' id='"+pageNum+"' value=\"\" onclick=\"showDefinitions('"+ kanji +"',"+ (pageNum-1) +")\">"+pageNum+"</button>");
+    $("#pageButton").append("<a id='"+pageNum+"' class='pageButton' onclick=\"showDefinitions('"+ kanji +"',"+ (pageNum-1) +")\">"+pageNum+"</a>");
 }
 
 function applyPageButtons(numDefinitions, newPage, kanji) {
@@ -131,6 +143,7 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 		numButtons--;
 	    }
 	    $('#1').attr('disabled',true);
+	    appendNextPageButton(kanji, 1, numButtons);
 	}    // buttons need some special formatting so we don't print out too many buttons
 	else {
 	    if (newPage < 7) {
@@ -142,16 +155,28 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 		// TODO add a next button here or something
 		appendDashButton();
 		appendPageButton(numButtons, kanji);
+		appendNextPageButton(kanji, 1, numButtons);
 	    }
 	}
     }    // current page is not near 1st page but near the middle or last
     else {
 	currentPage = parseInt($('button:disabled').prop('id'));
-	// turn currentPage into an int
 	// page buttons don't need to be reloaded, just change the highlighted button
 	if ((currentPage < 5 && newPage < 5) || (currentPage > (numButtons - 4) && newPage > (numButtons - 4))) {
 	    $('button:disabled').attr('disabled',false);
 	    $('#'+newPage).attr('disabled',true);
+	    $('#next').onclick = function() {
+		if(newPage < numButtons)
+		    showDefinitions(kanji,newPage+1);
+		else
+		    $('#next').attr('disabled',true);
+	    };
+	    $('#prev').onclick = function() {
+		if(newPage > 1)
+		    showDefinitions(kanji,newPage-1);
+		else
+		    $('#prev').attr('disabled',true);
+	    };
 	} // reformat the buttons
 	else {
 	    if (newPage < 5) {
@@ -163,12 +188,13 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 		$('#'+newPage).attr('disabled',true);
 		appendDashButton();
 		appendPageButton(numButtons, kanji);
+		appendNextPageButton(kanji, newPage, numButtons);
 	    }
 	    else if (newPage < numButtons-3) {
 		pageButtonDiv.innerHTML = "";
+		appendPrevPageButton(kanji, newPage);
 		appendPageButton(i, kanji);
 		appendDashButton();
-		// TODO append scroller button
 		i = newPage - 2;
 		while (i < newPage+3) {
 		    appendPageButton(i, kanji);
@@ -176,6 +202,7 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 		}
 		appendDashButton();
 		appendPageButton(numButtons, kanji);
+		appendNextPageButton(kanji, newPage, numButtons);
 		// TODO append next page button
 		$('button:disabled').attr('disabled',false);
 		$('#'+newPage).attr('disabled',true);
@@ -183,6 +210,7 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 	    // newPage is near the last page
 	    else if (newPage > (numButtons - 4)) {
 		pageButtonDiv.innerHTML = "";
+		appendPrevPageButton(kanji, newPage);
 		appendPageButton(i, kanji);
 		appendDashButton();
 		i = numButtons - 5;
@@ -191,6 +219,7 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 		    i++;
 		}
 		$('#'+newPage).attr('disabled',true);
+		appendNextPageButton(kanji, newPage, numButtons);
 		// TODO add next page button
 	    }
 	}
@@ -238,13 +267,13 @@ function addButtonsUsingArray(arrayWithKeys, statsMap) {
     }
 }
 
-function addButtonsUsingMap(statsMap) {
+function addButtonsUsingMap(statsMap, clearOutputArea) {
     var sortedStats = Object.keys(statsMap)
 	.sort(function(a,b) {
 	    return statsMap[b] - statsMap[a];
 	});
-
-    document.getElementById("outputarea").innerHTML = "";
+    if(clearOutputArea)
+	document.getElementById("outputarea").innerHTML = "";
     for (var index in sortedStats) {
 	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\',0);">'+sortedStats[index]+' : '+statsMap[sortedStats[index]]+'</button>');
     }
@@ -270,41 +299,47 @@ function addPermutations(text) {
     }, {});
 }
 
-var input = document.querySelector('#input');
-var currPage = 0;
-var kanjiOnPage = "";
-
-input.addEventListener('keyup', function () {
-    var statistics = wordStat(input.value);
-    addButtonsUsingMap(statistics);
-});
-
-var button = document.querySelector('#lookupkanji');
-
-button.addEventListener('click', function () {
+function parseForKanji() {
+    var input = document.querySelector('#input');
     var inputText = input.value;
     var splitUpParsedText = inputText.match(/[^ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖ、・。“” ']+/g);
     splitUpParsedText = addPermutations(splitUpParsedText);
     var reducedParsedText = Object.keys(splitUpParsedText);
     var textToParse = JSON.stringify(reducedParsedText);
-    // console.log(textToParse);
     $.post("/parse", textToParse,
 	   function(data,status) {
-	       // document.getElementById("definitions").innerHTML = "";
 	       var definitions = document.getElementById('definitions');
 	       var validKanji = JSON.parse(data);
-	       // console.log(validKanji);
 	       addButtonsUsingArray(validKanji, splitUpParsedText);
 	   });
     var url = document.createElement('a');
     url.href = window.location;
     url.hash = input.value;
     history.replaceState({}, document.title, url.href);
+}
+
+var currPage = 0;
+var kanjiOnPage = "";
+var input = document.querySelector('#input');
+input.addEventListener('keyup', function () {
+    var statistics = wordStat(input.value);
+    addButtonsUsingMap(statistics,true);
 });
+
+var button = document.querySelector('#lookupkanji');
+button.addEventListener('click', parseForKanji);
 
 window.onload = function(){
     var input = document.querySelector('#input');
     if (input.value == "") {
 	input.value = window.location.hash.substring(1);
+	parseForKanji();
+	var statistics = wordStat(input.value);
+	addButtonsUsingMap(statistics,false);
     }
+    document.getElementById('checkbox').onchange = function {
+	if (document.getElementById('checkbox').checked === false ) {
+
+	}
+    };
 };
