@@ -225,8 +225,10 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 		}
 	}
 
+	log.Println("The number of definitions is: ", results.NumDefinitionsTotal)
 	// Query with LIMIT using pages
-	first_sql := strings.Replace(first_sql_string, "page", strconv.Itoa(lookUpInfo.Page), 1)
+	first_sql := strings.Replace(first_sql_string, "page", strconv.Itoa(lookUpInfo.Page * 15), 1)
+	log.Println("first_sql: ", first_sql)
 	stmt, err = db.Prepare(first_sql)
 	if err != nil {
 		log.Fatal(err)
@@ -265,12 +267,16 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 		}
 
 		if word_definitions[k_ele_id_key].Sense[sense_id_key] == nil {
+			log.Println("initialize sense_id", sense_id_key)
+			log.Println("initialize k_ele_id_key", k_ele_id_key)
 			word_definitions[k_ele_id_key].Sense[sense_id_key] = &Senseinfo{}
 		}
 	}
-
+	// log.Println("Passed the setup onto the last query")
+	// log.Println("initialize word_definitions[116538]: ",word_definitions["106597"])
 	kr_inf_sql := getInfoSQL(k_ele_ids, r_ele_ids, sense_ids)
 	// second sql query
+	// log.Println(kr_inf_sql)
 	rows, err = db.Query(kr_inf_sql)
 	if err != nil{
 		log.Fatal(err)
@@ -295,6 +301,8 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 
 		// use sense_id to differentiate from eachother
 		sense_id_value = strconv.FormatInt(sense_id.Int64, 10)
+		log.Println("k_ele_id",k_ele_id,"ke_inf_val",ke_inf_val,"ke_pri_val",ke_pri_val,"r_ele_val",r_ele_val,"re_restr_val",re_restr_val,"re_inf_val",re_inf_val,"re_pri_val",re_pri_val,"sense_id",sense_id,"stagk_val",stagk_val,"stagr_val",stagr_val,"pos_val",pos_val,"xref_val",xref_val,"ant_val",ant_val,"field_val",field_val,"misc_val",misc_val,"s_inf_val",s_inf_val, "gloss_val",gloss_val)
+		// log.Println("sense_ids: ",sense_ids)
 
 		switch {
 		case ke_inf_val.Valid:
@@ -314,17 +322,26 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 		case pos_val.Valid:
 			word_definitions[k_ele_id_key].Sense[sense_id_value].Pos = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Pos, pos_val.String)
 		case xref_val.Valid:
-			word_definitions[k_ele_id_key].Sense[sense_id_value].Xref = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Xref, xref_val.String)
+			if (word_definitions[k_ele_id_key].Sense[sense_id_value] != nil) {
+				word_definitions[k_ele_id_key].Sense[sense_id_value].Xref = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Xref, xref_val.String)
+			}
 		case ant_val.Valid:
 			word_definitions[k_ele_id_key].Sense[sense_id_value].Ant = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Ant, ant_val.String)
 		case field_val.Valid:
 			word_definitions[k_ele_id_key].Sense[sense_id_value].Field = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Field, field_val.String)
 		case misc_val.Valid:
-			word_definitions[k_ele_id_key].Sense[sense_id_value].Misc = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Misc, misc_val.String)
+			if (word_definitions[k_ele_id_key].Sense[sense_id_value] != nil) {
+				word_definitions[k_ele_id_key].Sense[sense_id_value].Misc = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Misc, misc_val.String)
+			}
 		case s_inf_val.Valid:
 			word_definitions[k_ele_id_key].Sense[sense_id_value].S_inf = append(word_definitions[k_ele_id_key].Sense[sense_id_value].S_inf, s_inf_val.String)
 		case gloss_val.Valid:
-			word_definitions[k_ele_id_key].Sense[sense_id_value].Gloss = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Gloss, gloss_val.String)
+			// log.Println("sense_id_value",sense_id_value)
+			// log.Println("gloss_val.String",gloss_val.String)
+			// log.Println("word_definitions[k_ele_id_key].Sense[sense_id_value]: ",word_definitions[k_ele_id_key].Sense[sense_id_value]);
+			if (word_definitions[k_ele_id_key].Sense[sense_id_value] != nil) {
+				word_definitions[k_ele_id_key].Sense[sense_id_value].Gloss = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Gloss, gloss_val.String)
+			}
 
 		}
 	}

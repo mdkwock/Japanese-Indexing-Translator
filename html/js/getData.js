@@ -106,7 +106,7 @@ function appendDashButton() {
 }
 
 function appendPageButton(pageNum, kanji) {
-    $("#pageButton").append("<button type='button' id='page"+pageNum+"' value=\"\" onclick=\"showDefinitions('"+ kanji +"',"+ (pageNum-1) +")\">"+pageNum+"</button>");
+    $("#pageButton").append("<button type='button' id='"+pageNum+"' value=\"\" onclick=\"showDefinitions('"+ kanji +"',"+ (pageNum-1) +")\">"+pageNum+"</button>");
 }
 
 function applyPageButtons(numDefinitions, newPage, kanji) {
@@ -118,22 +118,19 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
     }
     newPage = newPage + 1;
     var numButtons = Math.ceil(numDefinitions / 15);
-
+    var i = 1;
     if (kanjiOnPage != kanji) {
 	pageButtonDiv.innerHTML = "";
 	kanjiOnPage = kanji;
 
 	// TODO add previous page button
-	// TODO disable page 1
-	var i = 1;
-	// normally add buttons if there aren't that many ( < 8)
-	if (numButtons < 8) {
+	if (numButtons < 8) {	// normally add buttons if there aren't that many ( < 8)
 	    while (numButtons > 0) {
 		appendPageButton(i,kanji);
 		i++;
 		numButtons--;
 	    }
-	    $('#page1').attr('disabled',true);
+	    $('#1').attr('disabled',true);
 	}    // buttons need some special formatting so we don't print out too many buttons
 	else {
 	    if (newPage < 7) {
@@ -141,7 +138,7 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 		    appendPageButton(i,kanji);
 		    i++;
 		}
-		$('#page1').attr('disabled',true);
+		$('#1').attr('disabled',true);
 		// TODO add a next button here or something
 		appendDashButton();
 		appendPageButton(numButtons, kanji);
@@ -149,15 +146,25 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 	}
     }    // current page is not near 1st page but near the middle or last
     else {
-	currentPage = parseInt($('button:disabled').prop('id').slice(-1));
+	currentPage = parseInt($('button:disabled').prop('id'));
 	// turn currentPage into an int
 	// page buttons don't need to be reloaded, just change the highlighted button
-	if ((currentPage < 5 && newPage < 5) || (currentPage > (numButtons - 5) && newPage > (numButtons - 5))) {
+	if ((currentPage < 5 && newPage < 5) || (currentPage > (numButtons - 4) && newPage > (numButtons - 4))) {
 	    $('button:disabled').attr('disabled',false);
-	    $('#page'+newPage).attr('disabled',true);
+	    $('#'+newPage).attr('disabled',true);
 	} // reformat the buttons
 	else {
-	    if (newPage < numButtons-5) {
+	    if (newPage < 5) {
+		pageButtonDiv.innerHTML = "";
+		while(i < 7) {
+		    appendPageButton(i, kanji);
+		    i++;
+		}
+		$('#'+newPage).attr('disabled',true);
+		appendDashButton();
+		appendPageButton(numButtons, kanji);
+	    }
+	    else if (newPage < numButtons-3) {
 		pageButtonDiv.innerHTML = "";
 		appendPageButton(i, kanji);
 		appendDashButton();
@@ -168,22 +175,22 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 		    i++;
 		}
 		appendDashButton();
-		// TODO append scroller button
 		appendPageButton(numButtons, kanji);
 		// TODO append next page button
 		$('button:disabled').attr('disabled',false);
-		$('#page'+newPage).attr('disabled',true);
+		$('#'+newPage).attr('disabled',true);
 	    }
 	    // newPage is near the last page
-	    else if (newPage > (numButtons - 7)) {
+	    else if (newPage > (numButtons - 4)) {
+		pageButtonDiv.innerHTML = "";
 		appendPageButton(i, kanji);
 		appendDashButton();
-		i = numButtons - 7;
+		i = numButtons - 5;
 		while (i <= numButtons) {
 		    appendPageButton(i,kanji);
 		    i++;
 		}
-		$('#page'+newPage).attr('disabled',true);
+		$('#'+newPage).attr('disabled',true);
 		// TODO add next page button
 	    }
 	}
@@ -195,10 +202,10 @@ function showDefinitions(kanji, page) {
     var wordtolookup = JSON.stringify(whatToLookUp);
     $.post("/post", wordtolookup,
 	   function(data,status) {
-	       var results = JSON.parse(data);
+	       var definitions = JSON.parse(data);
 	       document.getElementById("definitions").innerHTML = "";
-	       applyPageButtons(results.NumDefinitionsTotal, page, kanji);
-	       appendToTable(results.Definitions);
+	       applyPageButtons(definitions.NumDefinitionsTotal, page, kanji);
+	       appendToTable(definitions.Definitions);
 	   });
 }
 
@@ -289,4 +296,15 @@ button.addEventListener('click', function () {
 	       // console.log(validKanji);
 	       addButtonsUsingArray(validKanji, splitUpParsedText);
 	   });
+    var url = document.createElement('a');
+    url.href = window.location;
+    url.hash = input.value;
+    history.replaceState({}, document.title, url.href);
 });
+
+window.onload = function(){
+    var input = document.querySelector('#input');
+    if (input.value == "") {
+	input.value = window.location.hash.substring(1);
+    }
+};
