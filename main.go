@@ -212,6 +212,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 	defer rows.Close()
 
 	results := NewEntry()
+	results.Page = lookUpInfo.Page
 	word_definitions := results.Definitions
 
 	for rows.Next() {

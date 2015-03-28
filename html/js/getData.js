@@ -13,7 +13,6 @@ function wordStat(text) {
 }
 
 function appendToTable(results) {
-    var definitions = document.getElementById('definitions');
     var odd = true;
     for (var row in results) {
 	for (var kana in results[row].R_ele) {
@@ -95,8 +94,8 @@ function appendToTable(results) {
 
 	    tr.appendChild(meanings_td);
 
-	    definitions.appendChild(tr);
-	    definitions.appendChild(lowertr);
+	    definitionsDiv.appendChild(tr);
+	    definitionsDiv.appendChild(lowertr);
 	}
     }
 }
@@ -107,23 +106,21 @@ function appendDashButton() {
 
 function appendPrevPageButton(kanji, currentPage) {
     prevPage = currentPage - 1;
-    if(prevPage > 1)
-	$("#pageButton").append("<a id='prev' class='pageButton' onclick=\"showDefinitions('"+ kanji +"',"+ (prevPage-1) +")\"><<</a>");
+    if(currentPage > 1)
+	$("#pageButton").append("<a id='prev' class='pageButton'>< Prev</a>");
 }
 
 function appendNextPageButton(kanji, currentPage, totalPages) {
     nextPage = currentPage + 1;
     if(nextPage < totalPages)
-	$("#pageButton").append("<a id='next' class='pageButton' onclick=\"showDefinitions('"+ kanji +"',"+ (nextPage-1) +")\">>></a>");
+	$("#pageButton").append("<button id='next' value='"+kanji+"' class='pageButton'>Next ></button>");
 }
 
 function appendPageButton(pageNum, kanji) {
-    $("#pageButton").append("<a id='"+pageNum+"' class='pageButton' onclick=\"showDefinitions('"+ kanji +"',"+ (pageNum-1) +")\">"+pageNum+"</a>");
+    $("#pageButton").append("<button id='"+pageNum+"' class='pageButton' value='"+kanji+"'>"+pageNum+"</button>");
 }
 
 function applyPageButtons(numDefinitions, newPage, kanji) {
-    var pageButtonDiv = document.getElementById("pageButton");
-
     if (numDefinitions < 15) {
 	pageButtonDiv.innerHTML = "";
 	return;
@@ -135,7 +132,6 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 	pageButtonDiv.innerHTML = "";
 	kanjiOnPage = kanji;
 
-	// TODO add previous page button
 	if (numButtons < 8) {	// normally add buttons if there aren't that many ( < 8)
 	    while (numButtons > 0) {
 		appendPageButton(i,kanji);
@@ -147,6 +143,7 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 	}    // buttons need some special formatting so we don't print out too many buttons
 	else {
 	    if (newPage < 7) {
+		appendPrevPageButton(kanji, newPage);
 		while (i < 7) {
 		    appendPageButton(i,kanji);
 		    i++;
@@ -160,80 +157,61 @@ function applyPageButtons(numDefinitions, newPage, kanji) {
 	}
     }    // current page is not near 1st page but near the middle or last
     else {
-	currentPage = parseInt($('button:disabled').prop('id'));
-	// page buttons don't need to be reloaded, just change the highlighted button
-	if ((currentPage < 5 && newPage < 5) || (currentPage > (numButtons - 4) && newPage > (numButtons - 4))) {
+	pageButtonDiv.innerHTML = "";
+	if (newPage < 5) {
+	    if (newPage > 1)
+		appendPrevPageButton(kanji, newPage);
+	    while(i < 6) {
+		appendPageButton(i, kanji);
+		i++;
+	    }
+	    $('#'+newPage).attr('disabled',true);
+	    appendDashButton();
+	    appendPageButton(numButtons, kanji);
+	    appendNextPageButton(kanji, newPage, numButtons);
+	}
+	else if (newPage < numButtons-3) {
+	    appendPrevPageButton(kanji, newPage);
+	    // appendPageButton(i, kanji);
+	    // appendDashButton();
+	    i = newPage - 2;
+	    while (i < newPage+3) {
+		appendPageButton(i, kanji);
+		i++;
+	    }
+	    appendDashButton();
+	    appendPageButton(numButtons, kanji);
+	    appendNextPageButton(kanji, newPage, numButtons);
+	    // TODO append next page button
 	    $('button:disabled').attr('disabled',false);
 	    $('#'+newPage).attr('disabled',true);
-	    $('#next').onclick = function() {
-		if(newPage < numButtons)
-		    showDefinitions(kanji,newPage+1);
-		else
-		    $('#next').attr('disabled',true);
-	    };
-	    $('#prev').onclick = function() {
-		if(newPage > 1)
-		    showDefinitions(kanji,newPage-1);
-		else
-		    $('#prev').attr('disabled',true);
-	    };
-	} // reformat the buttons
-	else {
-	    if (newPage < 5) {
-		pageButtonDiv.innerHTML = "";
-		while(i < 7) {
-		    appendPageButton(i, kanji);
-		    i++;
-		}
-		$('#'+newPage).attr('disabled',true);
-		appendDashButton();
-		appendPageButton(numButtons, kanji);
-		appendNextPageButton(kanji, newPage, numButtons);
+	}
+	// newPage is near the last page
+	else if (newPage > (numButtons - 4)) {
+	    appendPrevPageButton(kanji, newPage);
+	    // appendPageButton(i, kanji);
+	    // appendDashButton();
+	    i = numButtons - 5;
+	    while (i <= numButtons) {
+		appendPageButton(i,kanji);
+		i++;
 	    }
-	    else if (newPage < numButtons-3) {
-		pageButtonDiv.innerHTML = "";
-		appendPrevPageButton(kanji, newPage);
-		appendPageButton(i, kanji);
-		appendDashButton();
-		i = newPage - 2;
-		while (i < newPage+3) {
-		    appendPageButton(i, kanji);
-		    i++;
-		}
-		appendDashButton();
-		appendPageButton(numButtons, kanji);
-		appendNextPageButton(kanji, newPage, numButtons);
-		// TODO append next page button
-		$('button:disabled').attr('disabled',false);
-		$('#'+newPage).attr('disabled',true);
-	    }
-	    // newPage is near the last page
-	    else if (newPage > (numButtons - 4)) {
-		pageButtonDiv.innerHTML = "";
-		appendPrevPageButton(kanji, newPage);
-		appendPageButton(i, kanji);
-		appendDashButton();
-		i = numButtons - 5;
-		while (i <= numButtons) {
-		    appendPageButton(i,kanji);
-		    i++;
-		}
-		$('#'+newPage).attr('disabled',true);
-		appendNextPageButton(kanji, newPage, numButtons);
-		// TODO add next page button
-	    }
+	    $('#'+newPage).attr('disabled',true);
+	    appendNextPageButton(kanji, newPage, numButtons);
+	    // TODO add next page button
 	}
     }
 }
 
 function showDefinitions(kanji, page) {
-    var whatToLookUp = {"kanji":kanji, "page":page};
+    currPage = page;
+    var whatToLookUp = {"kanji":kanji, "page":currPage};
     var wordtolookup = JSON.stringify(whatToLookUp);
     $.post("/post", wordtolookup,
 	   function(data,status) {
 	       var definitions = JSON.parse(data);
-	       document.getElementById("definitions").innerHTML = "";
-	       applyPageButtons(definitions.NumDefinitionsTotal, page, kanji);
+	       definitionsDiv.innerHTML = "";
+	       applyPageButtons(definitions.NumDefinitionsTotal, currPage, kanji);
 	       appendToTable(definitions.Definitions);
 	   });
 }
@@ -253,7 +231,7 @@ function addButtonsUsingArray(arrayWithKeys, statsMap) {
 	return statsMap[b] - statsMap[a];
     });
 
-    document.getElementById("outputarea").innerHTML = "";
+    outputareaDiv.innerHTML = "";
 
     var testDuplicate = {};
     for (var index in sortedStats) {
@@ -263,7 +241,7 @@ function addButtonsUsingArray(arrayWithKeys, statsMap) {
 	    continue;
 	}
 
-	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\',0);">'+sortedStats[index]+' : '+ statsMap[sortedStats[index]]+'</button>');
+	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button not-single">'+sortedStats[index]+' : '+ statsMap[sortedStats[index]]+'</button>');
     }
 }
 
@@ -272,10 +250,10 @@ function addButtonsUsingMap(statsMap, clearOutputArea) {
 	.sort(function(a,b) {
 	    return statsMap[b] - statsMap[a];
 	});
-    if(clearOutputArea)
-	document.getElementById("outputarea").innerHTML = "";
+    // if(clearOutputArea)
+    // 	outputareaDiv.innerHTML = "";
     for (var index in sortedStats) {
-	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button" onclick="showDefinitions(\''+sortedStats[index]+'\',0);">'+sortedStats[index]+' : '+statsMap[sortedStats[index]]+'</button>');
+	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button single-char">'+sortedStats[index]+' : '+statsMap[sortedStats[index]]+'</button>');
     }
 }
 
@@ -300,7 +278,6 @@ function addPermutations(text) {
 }
 
 function parseForKanji() {
-    var input = document.querySelector('#input');
     var inputText = input.value;
     var splitUpParsedText = inputText.match(/[^ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖ、・。“” ']+/g);
     splitUpParsedText = addPermutations(splitUpParsedText);
@@ -308,9 +285,9 @@ function parseForKanji() {
     var textToParse = JSON.stringify(reducedParsedText);
     $.post("/parse", textToParse,
 	   function(data,status) {
-	       var definitions = document.getElementById('definitions');
 	       var validKanji = JSON.parse(data);
 	       addButtonsUsingArray(validKanji, splitUpParsedText);
+	       addButtonsUsingMap(wordStat(inputText),false);
 	   });
     var url = document.createElement('a');
     url.href = window.location;
@@ -320,26 +297,46 @@ function parseForKanji() {
 
 var currPage = 0;
 var kanjiOnPage = "";
+var pageButtonDiv = document.getElementById("pageButton");
+var definitionsDiv = document.getElementById("definitions");
+var outputareaDiv = document.getElementById("outputarea");
+var charCheckBox = document.getElementById('characters');
+var wordsCheckBox = document.getElementById('words');
 var input = document.querySelector('#input');
 input.addEventListener('keyup', function () {
-    var statistics = wordStat(input.value);
-    addButtonsUsingMap(statistics,true);
+    // var statistics = wordStat(input.value);
+    // addButtonsUsingMap(statistics,true);
 });
 
 var button = document.querySelector('#lookupkanji');
 button.addEventListener('click', parseForKanji);
 
+$('#pageButton').on('click', function(ev) {
+    if (ev.target.id === 'next')
+	showDefinitions(kanjiOnPage, currPage+1);
+    else if (ev.target.id === 'prev')
+	showDefinitions(kanjiOnPage, currPage-1);
+    else if (ev.target.id !== 'pageButton')
+	showDefinitions(ev.target.value, parseInt(ev.target.id)-1);
+});
+
+$('#outputarea').on('click', function(ev) {
+    if ($(ev.target).hasClass('flat-button'))
+	showDefinitions(ev.target.value, 0);
+});
+
 window.onload = function(){
-    var input = document.querySelector('#input');
     if (input.value == "") {
 	input.value = window.location.hash.substring(1);
+	outputareaDiv.innerHTML = "";
 	parseForKanji();
-	var statistics = wordStat(input.value);
-	addButtonsUsingMap(statistics,false);
     }
-    document.getElementById('checkbox').onchange = function {
-	if (document.getElementById('checkbox').checked === false ) {
 
-	}
+    document.getElementById('words').onchange = function() {
+	$(".not-single").toggle(15);
+    };
+
+    document.getElementById('characters').onchange = function() {
+	$(".single-char").toggle(15);
     };
 };

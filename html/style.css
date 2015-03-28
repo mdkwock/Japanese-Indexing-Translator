@@ -146,7 +146,7 @@ body {
     color: rgba(0,0,0,.8);
     border: 1px solid #999;
     border: 0 rgba(0,0,0,0);
-    background-color: rgba(239, 239, 239, 0.19);
+    background-color: rgba(148, 148, 148, 0.19);
     text-decoration: none;
     border-radius: 2px;
     display: inline-block;
@@ -168,7 +168,13 @@ body {
 }
 
 .pageButton:hover {
-    background-color: #FFF;
+    background-color: #CCC;
+}
+
+button:disabled {
+    pointer-events: none;
+    cursor: default;
+    background-color: grey;
 }
 
 .flat-button {
