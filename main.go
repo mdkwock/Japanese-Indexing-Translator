@@ -179,7 +179,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	log.Println("Post Start: ", r.Body)
 	decoder := json.NewDecoder(r.Body)
 
 	var lookUpInfo LookUpInfo
