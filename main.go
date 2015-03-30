@@ -93,8 +93,9 @@ func main(){
 	mux = http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir("./html")))
 	http.HandleFunc("/", static(IndexHandler))
-	http.HandleFunc("/post", PostHandler)
-	http.HandleFunc("/parse", ParseHandler)
+	http.HandleFunc("/about/", aboutHandler)
+	http.HandleFunc("/post", postHandler)
+	http.HandleFunc("/parse", parseHandler)
 	http.ListenAndServe(":42893", nil)
 }
 
@@ -109,12 +110,16 @@ func static(h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func aboutHandler(w http.ResponseWriter, r *http.Request){
+
+}
+
 func IndexHandler(w http.ResponseWriter, r *http.Request){
 	log.Println("GET /")
 	w.Write(INDEX_HTML)
 }
 
-func ParseHandler(w http.ResponseWriter, r *http.Request){
+func parseHandler(w http.ResponseWriter, r *http.Request){
 	if r.Method != "POST" {
 		log.Println("in post but early return")
 		http.NotFound(w, r)
@@ -127,6 +132,12 @@ func ParseHandler(w http.ResponseWriter, r *http.Request){
 	err := decoder.Decode(&textToParse)
 	if err != nil {
 		log.Println(err)
+	}
+
+	if (len(textToParse) < 1) {
+		// log.Println("textToParse < 1")
+		w.Write([]byte("[]"))
+		return
 	}
 
 	db, err := sql.Open("sqlite3", "jmdict.db")
@@ -172,7 +183,7 @@ func ParseHandler(w http.ResponseWriter, r *http.Request){
 	w.Write(jsontext)
 }
 
-func PostHandler(w http.ResponseWriter, r *http.Request){
+func postHandler(w http.ResponseWriter, r *http.Request){
 	if r.Method != "POST" {
 		log.Println("in post but early return")
 		http.NotFound(w, r)
@@ -224,6 +235,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 
 	// Query with LIMIT using pages
 	first_sql := strings.Replace(first_sql_string, "page", strconv.Itoa(lookUpInfo.Page * 15), 1)
+	log.Println(first_sql)
 	stmt, err = db.Prepare(first_sql)
 	if err != nil {
 		log.Fatal(err)
@@ -290,7 +302,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 
 		// use sense_id to differentiate from eachother
 		sense_id_value = strconv.FormatInt(sense_id.Int64, 10)
-		// log.Println("k_ele_id",k_ele_id,"ke_inf_val",ke_inf_val,"ke_pri_val",ke_pri_val,"r_ele_val",r_ele_val,"re_restr_val",re_restr_val,"re_inf_val",re_inf_val,"re_pri_val",re_pri_val,"sense_id",sense_id,"stagk_val",stagk_val,"stagr_val",stagr_val,"pos_val",pos_val,"xref_val",xref_val,"ant_val",ant_val,"field_val",field_val,"misc_val",misc_val,"s_inf_val",s_inf_val, "gloss_val",gloss_val)
+		log.Println("k_ele_id",k_ele_id,"ke_inf_val",ke_inf_val,"ke_pri_val",ke_pri_val,"r_ele_val",r_ele_val,"re_restr_val",re_restr_val,"re_inf_val",re_inf_val,"re_pri_val",re_pri_val,"sense_id",sense_id,"stagk_val",stagk_val,"stagr_val",stagr_val,"pos_val",pos_val,"xref_val",xref_val,"ant_val",ant_val,"field_val",field_val,"misc_val",misc_val,"s_inf_val",s_inf_val, "gloss_val",gloss_val)
 		// log.Println("sense_ids: ",sense_ids)
 
 		switch {
@@ -299,11 +311,17 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 		case ke_pri_val.Valid:
 			word_definitions[k_ele_id_key].K_ele.Ke_pri = append(word_definitions[k_ele_id_key].K_ele.Ke_pri, ke_pri_val.String)
 		case re_restr_val.Valid:
-			word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_restr = append(word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_restr, re_restr_val.String)
+			if word_definitions[k_ele_id_key].R_ele[r_ele_val.String] != nil {
+				word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_restr = append(word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_restr, re_restr_val.String)
+			}
 		case re_inf_val.Valid:
-			word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_inf = append(word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_inf, re_inf_val.String)
+			if word_definitions[k_ele_id_key].R_ele[r_ele_val.String] != nil {
+				word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_inf = append(word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_inf, re_inf_val.String)
+			}
 		case re_pri_val.Valid:
-			word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_pri = append(word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_pri, re_pri_val.String)
+			if word_definitions[k_ele_id_key].R_ele[r_ele_val.String] != nil {
+				word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_pri = append(word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_pri, re_pri_val.String)
+			}
 		case word_definitions[k_ele_id_key].Sense[sense_id_value] == nil:
 			// continue;
 		case stagk_val.Valid:
@@ -338,7 +356,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request){
 func init(){
 	INDEX_HTML, _ = ioutil.ReadFile("./html/index.html")
 
-	parseSQL = "select value from k_ele where value IN (";
+	parseSQL = "select value from k_ele where value IN ("
 	count_sql_string = "select count(*) from k_ele k LEFT OUTER JOIN r_ele r ON k.fk = r.fk LEFT OUTER JOIN sense s ON s.fk = k.fk where k.value like ?;"
 	first_sql_string = "select k.id, k.value, r.id, r.value, s.id from k_ele k LEFT OUTER JOIN r_ele r ON k.fk = r.fk LEFT OUTER JOIN sense s ON s.fk = k.fk where k.value like ? LIMIT page, 15;"
 	second_sql_string = "select k_ele.id as k_ele_id, entity.expansion as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, NULL as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from ke_inf, entity, k_ele where k_ele.id in (k) and k_ele.id = ke_inf.fk and ke_inf.entity = entity.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, ke_pri.value as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, NULL as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from ke_pri, k_ele where k_ele.id in (k) and k_ele.id = ke_pri.fk UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, r_ele.value as r_ele_val, re_restr.value as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, NULL as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from r_ele, re_restr, k_ele where k_ele.id in (k) and r_ele.id in (r) and k_ele.fk = r_ele.fk and re_restr.fk = r_ele.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, r_ele.value as r_ele_val, NULL as re_restr_val, entity.expansion as re_inf_val, NULL as re_pri_val, NULL as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from r_ele, re_inf, entity, k_ele where k_ele.id in (k) and r_ele.id in (r) and k_ele.fk = r_ele.fk and re_inf.fk = r_ele.id and re_inf.entity = entity.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, r_ele.value as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, re_pri.value as re_pri_val, NULL as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from r_ele, re_pri, k_ele where k_ele.id in (k) and r_ele.id in (r) and k_ele.fk = r_ele.fk and re_pri.fk = r_ele.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, stagk.value as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from sense, stagk, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and stagk.fk = sense.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, stagr.value as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from sense, stagr, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and stagr.fk = sense.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, NULL as stagr_val, entity.expansion as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from sense, pos, entity, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and pos.fk = sense.id and pos.entity = entity.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, xref.value as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from sense, xref, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and xref.fk = sense.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, ant.value as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from sense, ant, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and ant.fk = sense.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, entity.expansion as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from sense, field, entity, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and field.fk = sense.id and field.entity = entity.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, entity.expansion as misc_val, NULL as s_inf_val, NULL as gloss_val from sense, misc, entity, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and misc.fk = sense.id and misc.entity = entity.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, s_inf.value as s_inf_val, NULL as gloss_val from sense, s_inf, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and s_inf.fk = sense.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, gloss.value as gloss_val from sense, gloss, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and gloss.fk = sense.id;"
