@@ -198,7 +198,7 @@ func postHandler(w http.ResponseWriter, r *http.Request){
 		log.Println(r.Body)
 		log.Fatal(err)
 	}
-	log.Println("Decoded: ", lookUpInfo)
+	// log.Println("Decoded: ", lookUpInfo)
 
 	db, err := sql.Open("sqlite3", "jmdict.db")
 	if err != nil {
@@ -235,7 +235,7 @@ func postHandler(w http.ResponseWriter, r *http.Request){
 
 	// Query with LIMIT using pages
 	first_sql := strings.Replace(first_sql_string, "page", strconv.Itoa(lookUpInfo.Page * 15), 1)
-	log.Println(first_sql)
+	// log.Println(first_sql)
 	stmt, err = db.Prepare(first_sql)
 	if err != nil {
 		log.Fatal(err)
@@ -302,7 +302,7 @@ func postHandler(w http.ResponseWriter, r *http.Request){
 
 		// use sense_id to differentiate from eachother
 		sense_id_value = strconv.FormatInt(sense_id.Int64, 10)
-		log.Println("k_ele_id",k_ele_id,"ke_inf_val",ke_inf_val,"ke_pri_val",ke_pri_val,"r_ele_val",r_ele_val,"re_restr_val",re_restr_val,"re_inf_val",re_inf_val,"re_pri_val",re_pri_val,"sense_id",sense_id,"stagk_val",stagk_val,"stagr_val",stagr_val,"pos_val",pos_val,"xref_val",xref_val,"ant_val",ant_val,"field_val",field_val,"misc_val",misc_val,"s_inf_val",s_inf_val, "gloss_val",gloss_val)
+		// log.Println("k_ele_id",k_ele_id,"ke_inf_val",ke_inf_val,"ke_pri_val",ke_pri_val,"r_ele_val",r_ele_val,"re_restr_val",re_restr_val,"re_inf_val",re_inf_val,"re_pri_val",re_pri_val,"sense_id",sense_id,"stagk_val",stagk_val,"stagr_val",stagr_val,"pos_val",pos_val,"xref_val",xref_val,"ant_val",ant_val,"field_val",field_val,"misc_val",misc_val,"s_inf_val",s_inf_val, "gloss_val",gloss_val)
 		// log.Println("sense_ids: ",sense_ids)
 
 		switch {

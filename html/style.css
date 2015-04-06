@@ -1,24 +1,73 @@
-body {
+#page {
+    width: 960px;
+    margin: 0 auto !important;
+    overflow: hidden !important;
     font-family: Sans-serif;
     font-size: 62.5%;
     color: black;
-    margin: 0;
-    padding: 0;
     background-color: #fff;
-    min-width: 900px;
+    box-sizing: inherit;
+}
+
+#navigation {
+    border-bottom: 1px solid #bbb;
+    margin: 0 -7.5px 20px -7.5px;
+    /* padding: 0 7.5px; */
+    white-space: nowrap;
+    list-style-type: none;
+}
+
+header {
+    padding: 1em 0 .75em;
+}
+
+#navigation li {
+    display: inline-block;
+    margin-right: 1px;
+    font-size: 14px;
+}
+#navigation li a {
+    border: 1px solid transparent;
+    padding: 6px 10px;
+    display: inline-block;
+    margin-bottom: -1px;
+    color: #4d4d4d;
+    font-weight: 700;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    /* background: rgba(190,190,190,.25); */
+}
+
+#copyright {
+    box-sizing: border-box;
+    color: grey;
+}
+
+.content {
+    box-sizing: inherit;
+    display: inline-block;
+}
+
+.left-column {
+    width: 200px;
+    float: left;
+    height: 800px;
+}
+
+.right-column {
+    width: 700px;
+    float: right;
+    margin: 0 0 0 1em;
 }
 
 .input-column {
-    width: 13%;
-    height: 40%;
-    box-sizing: border-box;
-    position: fixed;
+    height: 300px;
     top: 0;
-    left: 0;
+    height: 200px;
 }
 
 #input {
-    width: 100%;
+    width: 97%;
     height: calc(100% - 40px)
 }
 
@@ -28,29 +77,11 @@ body {
 }
 
 .output-column {
-    height: 100%;
-}
-
-.outputarea {
-    width: 15%;
-    box-sizing: border-box;
-    position: fixed;
-    top: 40%;
-    left: 0;
-    bottom: 0;
+    height: 63%;
     overflow-y: auto;
 }
 
-.carousel {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.definitionscolumn {
-    width: 70%;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
+.outputarea {
 }
 
 #pageButton {
