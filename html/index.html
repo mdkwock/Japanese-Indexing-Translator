@@ -9,20 +9,28 @@
 
     <body>
 	<div id="page">
-	    <header>
-		<a class="logo" href="/" title="Something">
-		    Website Name
-		</a>
-	    </header>
-	    <ul id="navigation">
-		<li class="active">
-		    <a href="/">Home</a>
-		</li>
-		<li>
-		    <a href="/about">About</a>
-		</li>
-	    </ul>
+	    <div class="topbar">
+		<div class="topbar-wrapper">
+		    <div class="nav-items">
+			<a class="logo" href="/" title="Something">
+			    Website Name
+			</a>
+			<a href="/">Home</a>
+			<a href="/about">About</a>
+		    </div>
+		</div>
+	    </div>
 	    <div class="content">
+		<div id="pageButton">
+		    <a class="pageButton" id='1' value="">1</a>
+		    <a class="pageButton" id='2' value="">2</a>
+		    <a class="pageButton" id='3' value="">3</a>
+		    <a class="pageButton" id='4' value="">4</a>
+		    <a class="pageButton" id='5' value="">5</a>
+		    <a class="pageButton" id='6' value="">6</a>
+		    <a class="pageButton" id='7' value="">7</a>
+		</div>
+		<div class="interface">
 		<div class="left-column">
 		    <div class="input-column">
 		        <textarea id="input" placeholder="Paste your text here"></textarea>
@@ -38,15 +46,6 @@
 		</div>
 		<div class="right-column">
 		    <div class="definitionscolumn">
-		        <div id="pageButton">
-			    <a class="pageButton" id='1' value="">1</a>
-			    <a class="pageButton" id='2' value="">2</a>
-			    <a class="pageButton" id='3' value="">3</a>
-			    <a class="pageButton" id='4' value="">4</a>
-			    <a class="pageButton" id='5' value="">5</a>
-			    <a class="pageButton" id='6' value="">6</a>
-			    <a class="pageButton" id='7' value="">7</a>
-			</div>
 			<div id="results">
 			    <table border="0" id="word_result" cellspacing="0">
 				<tbody id="definitions">
@@ -92,6 +91,7 @@
 			    </table>
 			</div>
 		    </div>
+				</div>
 		</div>
 	    </div>
 	    <div id="copyright">
