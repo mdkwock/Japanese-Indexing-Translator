@@ -13,6 +13,7 @@ import (
 )
 
 var INDEX_HTML []byte
+var ABOUT_HTML []byte
 var first_sql_string, second_sql_string, parseSQL, count_sql_string string
 var mux *http.ServeMux
 
@@ -89,11 +90,12 @@ func getInfoSQL(k_ids []string, r_ids []string, s_ids []string) string {
 }
 
 func main(){
-	fmt.Println("starting server on http://localhost:8888/\n")
+	fmt.Println("starting server on http://localhost:42893/\n")
 	mux = http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir("./html")))
+	mux.Handle("/about/", http.FileServer(http.Dir("../html")))
 	http.HandleFunc("/", static(IndexHandler))
-	http.HandleFunc("/about/", aboutHandler)
+	http.HandleFunc("/about/", static(aboutHandler))
 	http.HandleFunc("/post", postHandler)
 	http.HandleFunc("/parse", parseHandler)
 	http.ListenAndServe(":42893", nil)
@@ -111,11 +113,12 @@ func static(h http.HandlerFunc) http.HandlerFunc {
 }
 
 func aboutHandler(w http.ResponseWriter, r *http.Request){
-
+	log.Println("Get /about page")
+	w.Write(ABOUT_HTML)
 }
 
 func IndexHandler(w http.ResponseWriter, r *http.Request){
-	log.Println("GET /")
+	log.Println("GET /index page")
 	w.Write(INDEX_HTML)
 }
 
@@ -355,6 +358,7 @@ func postHandler(w http.ResponseWriter, r *http.Request){
 
 func init(){
 	INDEX_HTML, _ = ioutil.ReadFile("./html/index.html")
+	ABOUT_HTML, _ = ioutil.ReadFile("./html/about.html")
 
 	parseSQL = "select value from k_ele where value IN ("
 	count_sql_string = "select count(*) from k_ele k LEFT OUTER JOIN r_ele r ON k.fk = r.fk LEFT OUTER JOIN sense s ON s.fk = k.fk where k.value like ?;"

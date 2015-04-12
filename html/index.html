@@ -22,76 +22,32 @@
 	    </div>
 	    <div class="content">
 		<div id="pageButton">
-		    <a class="pageButton" id='1' value="">1</a>
-		    <a class="pageButton" id='2' value="">2</a>
-		    <a class="pageButton" id='3' value="">3</a>
-		    <a class="pageButton" id='4' value="">4</a>
-		    <a class="pageButton" id='5' value="">5</a>
-		    <a class="pageButton" id='6' value="">6</a>
-		    <a class="pageButton" id='7' value="">7</a>
 		</div>
 		<div class="interface">
-		<div class="left-column">
-		    <div class="input-column">
-		        <textarea id="input" placeholder="Paste your text here"></textarea>
-			<button id="lookupkanji" type="button">Look up</button>
-			<input type="checkbox" id="characters" checked>Characters
-			<input type="checkbox" id="words" checked>Words
-		    </div>
-		    <div class="output-column">
-		        <div id="outputarea" class="outputarea">
-			    <button type="button" value="" class="flat-button" onclick="showDefinitions(\''+word+'\');">example : 1</button>
+		    <div class="left-column">
+			<div class="input-column">
+		            <textarea id="input" placeholder="Paste your text here"></textarea>
+			    <button id="lookupkanji" type="button">Look up</button>
+			    <input type="checkbox" id="characters" checked>Characters
+			    <input type="checkbox" id="words" checked>Words
+			</div>
+			<div class="output-column">
+		            <div id="outputarea" class="outputarea">
+			    </div>
 			</div>
 		    </div>
-		</div>
-		<div class="right-column">
-		    <div class="definitionscolumn">
-			<div id="results">
-			    <table border="0" id="word_result" cellspacing="0">
-				<tbody id="definitions">
-				    <tr class="odd">
-					<td class="kanji_column">
-					    <span class="kanji" style="z-index: 149999;"><span class="match">安</span></span>
-					</td>
-					<td class="kana_column">やす</td>
-					<td class="meanings_column"><strong>1: </strong> cheap;  <br><strong>2: </strong>  <span class="tags mn_tags" title="pref">(Prefix)</span> rash; thoughtless; careless; indiscreet; frivolous<br></td>
-				    </tr>
-				    <tr class="odd lower">
-					<td colspan="2">
-					    <span class="tags"><span title="pref">Prefix</span>, <span title="suf">Suffix</span>&nbsp;
-					    </span>
-					</td>
-					<td class="links">
-					    <ul class="adxm menu">
-						<li><a href="/sentences?jap=安">Sentences</a></li>
-						<li><a href="/kanji/details/安">Kanji details</a></li>
-					    </ul>
-					</td>
-				    </tr>
-				    <tr class="even">
-					<td class="kanji_column">
-					    <span class="kanji" style="z-index: 149997;"><span class="match">安</span>芸</span>
-					</td>
-					<td class="kana_column">あき</td>
-					<td class="meanings_column">former name of Hiroshima prefecture</td>
-				    </tr>
-				    <tr class="even lower">
-					<td colspan="2">
-					    <span class="tags"><span class="common">Common word, </span><span title="n">Noun</span>&nbsp;
-					    </span>
-					</td>
-					<td class="links">
-					    <ul class="adxm menu">
-						<li><a href="/sentences?jap=安芸">Sentences</a></li>
-						<li><a href="/kanji/details/安芸">Kanji details</a></li>
-					    </ul>
-					</td>
-				    </tr>
-				</tbody>
-			    </table>
+		    <div class="right-column">
+			<div id="help-div">
+			</div>
+			<div class="definitionscolumn">
+			    <div id="results">
+				<table border="0" id="word_result" cellspacing="0">
+				    <tbody id="definitions">
+				    </tbody>
+				</table>
+			    </div>
 			</div>
 		    </div>
-				</div>
 		</div>
 	    </div>
 	    <div id="copyright">
