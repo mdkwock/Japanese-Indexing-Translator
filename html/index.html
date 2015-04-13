@@ -1,66 +1,71 @@
 <!doctype html>
 <html>
-    <head>
-	<meta charset="utf-8">
-	<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
-	<title>解読</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
-    </head>
+	<head>
+		<meta charset="utf-8">
+		<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+		<title>解読</title>
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
 
-    <body>
-	<div id="page">
-	    <div class="topbar">
-		<div class="topbar-wrapper">
-		    <div class="nav-items">
-			<a class="logo" href="/" title="Something">
-			    Website Name
-			</a>
-			<a href="/">Home</a>
-			<a href="/about">About</a>
-		    </div>
-		</div>
-	    </div>
-	    <div class="content">
-		<div id="pageButton">
-		</div>
-		<div class="interface">
-		    <div class="left-column">
-			<div class="input-column">
-		            <textarea id="input" placeholder="Paste your text here"></textarea>
-			    <button id="lookupkanji" type="button">Look up</button>
-			    <input type="checkbox" id="characters" checked>Characters
-			    <input type="checkbox" id="words" checked>Words
+	<body>
+		<div id="page">
+			<div class="topbar">
+				<div class="topbar-wrapper">
+					<div class="nav-items">
+						<a class="logo" href="/" title="Something">
+							Website Name
+						</a>
+						<a href="/">Home</a>
+						<a href="/about">About</a>
+					</div>
+				</div>
 			</div>
-			<div class="output-column">
-		            <div id="outputarea" class="outputarea">
-			    </div>
+			<div class="content">
+				<div class="buttons">
+					<div id="triangle-button">
+						<button id="hide-textbox">△</button>
+					</div>
+					<div id="pageButton">
+					</div>
+				</div>
+				<div class="interface">
+					<div class="left-column">
+						<div class="input-column">
+							<textarea id="input" placeholder="Paste your text here"></textarea>
+							<button id="lookupkanji" type="button">Look up</button>
+							<input type="checkbox" id="characters" checked>Characters
+							<input type="checkbox" id="words" checked>Words
+						</div>
+						<div class="output-column">
+							<div id="outputarea" class="outputarea">
+							</div>
+						</div>
+					</div>
+					<div class="right-column">
+						<div id="help-div">
+						</div>
+						<div class="definitionscolumn">
+							<div id="results">
+								<table border="0" id="word_result" cellspacing="0">
+									<tbody id="definitions">
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
-		    </div>
-		    <div class="right-column">
-			<div id="help-div">
-			</div>
-			<div class="definitionscolumn">
-			    <div id="results">
-				<table border="0" id="word_result" cellspacing="0">
-				    <tbody id="definitions">
-				    </tbody>
-				</table>
-			    </div>
-			</div>
-		    </div>
-		</div>
-	    </div>
-	    <div id="copyright">
-		<div class="sources">
-		    <p>
-			My site uses the <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a> dictionary, provided by the <a href="http://www.edrdg.org/edrdg/licence.html">Electronic Dictionary Research and Development Group</a>.
+			<div id="copyright">
+				<div class="sources">
+					<p>
+						My site uses the <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a> dictionary, provided by the <a href="http://www.edrdg.org/edrdg/licence.html">Electronic Dictionary Research and Development Group</a>.
 
-			Please see the <a href="/about">data and copyright information</a> for more details.
-	   	    </p>
+						Please see the <a href="/about">data and copyright information</a> for more details.
+	   				</p>
+				</div>
+			</div>
 		</div>
-	    </div>
-	</div>
-	<script src="js/jquery-2.1.3.min.js"></script>
-	<script src="js/getData.js"></script>
-    </body>
+		<script src="js/jquery-2.1.3.min.js"></script>
+		<script src="js/getData.js"></script>
+	</body>
 </html>
