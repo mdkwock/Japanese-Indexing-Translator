@@ -75,6 +75,11 @@
     display: inline-block;
 }
 
+#hide-textbox {
+    border-style: none;
+    background: transparent;
+}
+
 .left-column {
     width: 200px;
     float: left;
@@ -124,9 +129,12 @@
     overflow-y: auto;
 }
 
-#pageButton {
+.buttons {
     min-height: 26px;
-    min-width: 1px;
+    width: 100%;
+}
+
+#pageButton {
     float: right;
 }
 
