@@ -280,8 +280,10 @@ window.onload = function(){
     });
 
     $('#outputarea').on('click', function(ev) {
-	if ($(ev.target).hasClass('flat-button'))
+	if ($(ev.target).hasClass('flat-button')) {
 	    helpDiv.innerHTML = "";
+	    helpDiv.style.marginTop = 0;
+	}
 	    showDefinitions(ev.target.value, 0);
     });
 
