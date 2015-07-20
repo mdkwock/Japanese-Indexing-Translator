@@ -1,14 +1,13 @@
 #page {
     width: 960px;
-    margin: 0 auto !important;
+    margin-left: auto;
+    margin-right: auto;
     overflow: hidden !important;
     font-family: Sans-serif;
     font-size: 62.5%;
     color: black;
     background-color: #fff;
     box-sizing: inherit;
-    padding-left: 15px;
-    padding-right: 15px;
 }
 
 #navigation {
@@ -80,6 +79,11 @@
     background: transparent;
 }
 
+#triangle-button {
+    margin-top: -25px;
+    float: right;
+}
+
 .left-column {
     width: 200px;
     float: left;
@@ -109,9 +113,7 @@
     margin-top: -16px;
 }
 .input-column {
-    height: 300px;
-    top: 0;
-    height: 200px;
+    height: 30%;
 }
 
 #input {
