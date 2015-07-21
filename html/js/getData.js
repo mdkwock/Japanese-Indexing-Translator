@@ -251,13 +251,16 @@ var currPage = 0;
 var kanjiOnPage = "";
 var pageButtonDiv = document.getElementById("pageButton");
 var definitionsDiv = document.getElementById("definitions");
+var outputColumnDiv = document.getElementById("output-column");
 var outputareaDiv = document.getElementById("outputarea");
 var charCheckBox = document.getElementById('characters');
 var wordsCheckBox = document.getElementById('words');
+var inputColumnDiv = document.getElementById('input-column');
 var input = document.querySelector('#input');
 var button = document.querySelector('#lookupkanji');
 var initialLoad = false;
 var helpDiv = document.getElementById('help-div');
+var triangleButtonDiv = document.getElementById('triangle-button');
 
 button.addEventListener('click', parseForKanji);
 
@@ -269,6 +272,18 @@ window.onload = function(){
     document.getElementById('characters').onchange = function() {
 	$(".single-char").toggle(15);
     };
+
+    triangleButtonDiv.onclick = function() {
+	if (inputColumnDiv.style.display != "none") {
+	    inputColumnDiv.style.display = "none";
+	    outputColumnDiv.className = "output-column-expanded";
+	}
+	else{
+	    inputColumnDiv.style.display = "inline-block";
+	    outputColumnDiv.className = "output-column";
+	}
+    };
+
 
     $('#pageButton').on('click', function(ev) {
 	if (ev.target.id === 'next')
