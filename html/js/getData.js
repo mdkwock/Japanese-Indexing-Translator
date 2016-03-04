@@ -260,7 +260,7 @@ var input = document.querySelector('#input');
 var button = document.querySelector('#lookupkanji');
 var initialLoad = false;
 var helpDiv = document.getElementById('help-div');
-var triangleButtonDiv = document.getElementById('triangle-button');
+var triangleButtonDiv = document.getElementById('hide-textbox');
 
 button.addEventListener('click', parseForKanji);
 
@@ -273,17 +273,18 @@ window.onload = function(){
 	$(".single-char").toggle(15);
     };
 
-    triangleButtonDiv.onclick = function() {
-	if (inputColumnDiv.style.display != "none") {
-	    inputColumnDiv.style.display = "none";
-	    outputColumnDiv.className = "output-column-expanded";
-	}
-	else{
-	    inputColumnDiv.style.display = "inline-block";
-	    outputColumnDiv.className = "output-column";
-	}
-    };
-
+    // triangleButtonDiv.onclick = function() {
+    // 	if (inputColumnDiv.style.display != "none") {
+    // 	    inputColumnDiv.style.display = "none";
+    // 	    outputColumnDiv.className = "output-column-expanded";
+    // 	    triangleButtonDiv.innerHTML = "Hide Text△";
+    // 	}
+    // 	else{
+    // 	    inputColumnDiv.style.display = "inline-block";
+    // 	    outputColumnDiv.className = "output-column";
+    // 	    triangleButtonDiv.innerHTML = "Show Text△";
+    // 	}
+    // };
 
     $('#pageButton').on('click', function(ev) {
 	if (ev.target.id === 'next')
@@ -295,27 +296,18 @@ window.onload = function(){
     });
 
     $('#outputarea').on('click', function(ev) {
-	if ($(ev.target).hasClass('flat-button')) {
-	    helpDiv.innerHTML = "";
-	    helpDiv.style.marginTop = 0;
-	}
+	// if ($(ev.target).hasClass('flat-button')) {
+	//     helpDiv.innerHTML = "";
+	//     helpDiv.style.marginTop = 0;
+	// }
 	    showDefinitions(ev.target.value, 0);
     });
 
     if (window.location.hash.substring(1) !== "") {
+	console.log(window.location.hash.substring(1));
 	input.value = window.location.hash.substring(1);
 	outputareaDiv.innerHTML = "";
 	parseForKanji();
-    }
-
-    if (input.value == "") {
-	helpDiv.innerHTML = "\
-	    <h2>Try pasting this paragraph into the textbox and clicking the Look Up button! </h2>\
-	    <p>\
-	クラスごと異世界に召喚され、他のクラスメイトがチートなスペックと“天職”を有する中、一人平凡を地で行く主人公南雲ハジメ。彼の“天職”は“錬成師”、言い換えれば唯の鍛治職だった。最弱の彼は、クラスメイトにより奈落の底に落とされる。必死に生き足掻き、気がつけば世界最強・・・というありがちストーリー。最強物を書きたくて書きました。最強、ハーレム等テンプレを多分に含みます。最終的に不遜で鬼畜な主人公を目指します。見切り発車なので途中で改変する可能性があります。\
-	</p>\
-	    <img src=\"arrow100.png\" alt=\"arrow\">";
-	initialLoad = true;
     }
 
 };

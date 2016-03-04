@@ -90,7 +90,7 @@ func getInfoSQL(k_ids []string, r_ids []string, s_ids []string) string {
 }
 
 func main(){
-	fmt.Println("starting server on http://localhost:42893/\n")
+	fmt.Println("starting server on http://localhost:42893/")
 	mux = http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir("./html")))
 	mux.Handle("/about/", http.FileServer(http.Dir("../html")))
