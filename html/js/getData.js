@@ -11,40 +11,40 @@ function wordStat(text) {
         return stat;
     }, {});
 }
+function empty(divNode) {
+    for (var i = divNode.childNodes.length - 1; i >= 0; i--) {
+	divNode.removeChild(divNode.childNodes[i]);
+    }
+}
 
 function appendToTable(results) {
     var odd = true;
     for (var row in results) {
+	var definitionRowFragment = document.importNode(rowTemplateDiv.content, true),
+	    definitionRow = definitionRowFragment.querySelector('tr'),
+	    tds = definitionRow.querySelectorAll('td'),
+	    lowerRowFragment = document.importNode(lowerRowTemplateDiv.content, true),
+	    lowerRow = lowerRowFragment.querySelector('tr'),
+	    lowertd = lowerRow.querySelector('td');
 	for (var kana in results[row].R_ele) {
 	    var tr = document.createElement('tr'),
-		kanji_td = document.createElement('td'),
-		kana_td = document.createElement('td'),
-		meanings_td = document.createElement('td'),
-		span = document.createElement('span'),
-		spanLower = document.createElement('span'),
-		kanji_text = document.createTextNode(results[row].K_ele.Kanji),
-		kana_text = document.createTextNode(kana),
-		lowertr = document.createElement('tr'),
-		lowertd = document.createElement('td'),
-		lowertd2 = document.createElement('td');
+		kanji_td = tds[0],
+		kana_td = tds[1],
+		meanings_td = tds[2],
+		span = kanji_td.getElementsByClassName('kanji')[0],
+		spanLower = lowertd.getElementsByClassName('tags')[0],
+		kanji_text = document.createTextNode(results[row].K_ele.Kanji);
 
-	    tr.className = (odd) ? 'odd' : 'even';
+	    definitionRow.className = (odd) ? 'odd' : 'even';
 	    odd = !odd;
 
 	    // Kanji column
-	    kanji_td.className = 'kanji_column';
-	    span.className = 'kanji';
-	    span.appendChild(kanji_text);
-	    kanji_td.appendChild(span);
-	    tr.appendChild(kanji_td);
+	    span.textContent = results[row].K_ele.Kanji;
 
 	    // Kana column
-	    kana_td.className = 'kana_column';
-	    kana_td.appendChild(kana_text);
-	    tr.appendChild(kana_td);
+	    kana_td.textContent = kana;
 
 	    // Meanings column
-	    meanings_td.className = 'meanings_column';
 	    var definitionNum = 1,
 		numberOfDefinitions = Object.size(results[row].Sense),
 		numberTheList = (numberOfDefinitions > 1);
@@ -83,19 +83,12 @@ function appendToTable(results) {
 		spanCommon.appendChild(document.createTextNode((pos_text != null) ? 'Common word, ' : 'Common word'));
 		spanLower.appendChild(spanCommon);
 	    }
-	    spanLower.className = 'tags';
 	    var lowertd_text = document.createTextNode(pos_text.join(', '));
 	    spanLower.appendChild(lowertd_text);
-	    lowertr.className = tr.className + " lower";
-	    lowertd.colSpan = 2;
-	    lowertd.appendChild(spanLower);
-	    lowertr.appendChild(lowertd);
-	    lowertr.appendChild(lowertd2);
+	    lowerRow.className = lowerRow.className + ' ' + definitionRow.className;
 
-	    tr.appendChild(meanings_td);
-
-	    definitionsDiv.appendChild(tr);
-	    definitionsDiv.appendChild(lowertr);
+	    definitionsDiv.appendChild(definitionRow);
+	    definitionsDiv.appendChild(lowerRow);
 	}
     }
 }
@@ -115,7 +108,7 @@ function appendPageButton(pageNum, kanji) {
 }
 
 function applyPageButtons(numDefinitions, newPage, kanji) {
-    pageButtonDiv.innerHTML = "";
+    empty(pageButtonDiv);
     if (numDefinitions < 15) {
 	return;
     }
@@ -164,7 +157,8 @@ function showDefinitions(kanji, page) {
     $.post("/post", wordtolookup,
 	   function(data,status) {
 	       var definitions = JSON.parse(data);
-	       definitionsDiv.innerHTML = "";
+	       console.log(definitions);
+	       empty(definitionsDiv);
 	       applyPageButtons(definitions.NumDefinitionsTotal, currPage, kanji);
 	       appendToTable(definitions.Definitions);
 	   });
@@ -185,7 +179,7 @@ function addButtonsUsingArray(arrayWithKeys, statsMap) {
 	return statsMap[b] - statsMap[a];
     });
 
-    outputareaDiv.innerHTML = "";
+    empty(outputareaDiv);
 
     var testDuplicate = {};
     for (var index in sortedStats) {
@@ -261,6 +255,8 @@ var button = document.querySelector('#lookupkanji');
 var initialLoad = false;
 var helpDiv = document.getElementById('help-div');
 var triangleButtonDiv = document.getElementById('hide-textbox');
+var rowTemplateDiv = document.querySelector('#rowTemplate');
+var lowerRowTemplateDiv = document.querySelector('#lowerRowTemplate');
 
 button.addEventListener('click', parseForKanji);
 
@@ -306,7 +302,7 @@ window.onload = function(){
     if (window.location.hash.substring(1) !== "") {
 	console.log(window.location.hash.substring(1));
 	input.value = window.location.hash.substring(1);
-	outputareaDiv.innerHTML = "";
+	empty(outputareaDiv);
 	parseForKanji();
     }
 

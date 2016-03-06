@@ -25,10 +25,10 @@ func main(){
 	mux = http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir("./html")))
 	mux.Handle("/about/", http.FileServer(http.Dir("../html")))
-	http.HandleFunc("/", static(IndexHandler))
+	http.HandleFunc("/", static(HomeHandler))
 	http.HandleFunc("/about/", static(aboutHandler))
-	http.HandleFunc("/post", postHandler)
-	http.HandleFunc("/parse", parseHandler)
+	http.HandleFunc("/parse", parseWordsHandler)
+	http.HandleFunc("/post", lookUpWordHandler)
 	http.ListenAndServe(":42893", nil)
 }
 
@@ -48,12 +48,12 @@ func aboutHandler(w http.ResponseWriter, r *http.Request){
 	w.Write(ABOUT_HTML)
 }
 
-func IndexHandler(w http.ResponseWriter, r *http.Request){
+func HomeHandler(w http.ResponseWriter, r *http.Request){
 	log.Println("GET /index page")
 	w.Write(INDEX_HTML)
 }
 
-func parseHandler(w http.ResponseWriter, r *http.Request){
+func parseWordsHandler(w http.ResponseWriter, r *http.Request){
 	if r.Method != "POST" {
 		log.Println("in post but early return")
 		http.NotFound(w, r)
@@ -65,11 +65,13 @@ func parseHandler(w http.ResponseWriter, r *http.Request){
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&textToParse)
 	if err != nil {
+		log.Println(r.Body)
 		log.Println(err)
 	}
 
 	if (len(textToParse) < 1) {
 		log.Println("textToParse < 1")
+		log.Println(textToParse)
 		w.Write([]byte("[]"))
 		return
 	}
@@ -81,7 +83,7 @@ func parseHandler(w http.ResponseWriter, r *http.Request){
 	w.Write(validKanjis)
 }
 
-func postHandler(w http.ResponseWriter, r *http.Request){
+func lookUpWordHandler(w http.ResponseWriter, r *http.Request){
 	if r.Method != "POST" {
 		log.Println("in post but early return")
 		http.NotFound(w, r)
@@ -97,7 +99,7 @@ func postHandler(w http.ResponseWriter, r *http.Request){
 		log.Fatal(err)
 	}
 
-	definitions, err := kanjiutil.LookupDefinitions(lookUpInfo.Kanji, lookUpInfo.Page);
+	definitions, err := kanjiutil.LookUpDefinitions(lookUpInfo.Kanji, lookUpInfo.Page);
 	if err != nil {
 		log.Fatal(err)
 	}

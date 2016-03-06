@@ -106,7 +106,7 @@ func createGetInfoSQL(k_ids []string, r_ids []string, s_ids []string) string {
 	return kr_inf_sql
 }
 
-func retrieve15Words(kanjiToLookUp string, pageNumber int, word_definitions map[string]*dictionaryresult) error {
+func retrieve15Definitions(kanjiToLookUp string, pageNumber int, word_definitions map[string]*dictionaryresult) error {
 	// Query with LIMIT using pages
 	get_15_definitions_sql := strings.Replace(limit_results_sql_string, "page", strconv.Itoa(pageNumber * 15), 1)
 	stmt, err := db.Prepare(get_15_definitions_sql)
@@ -264,7 +264,7 @@ func ParseForKanji(textToParse []string) ([]byte, error) {
 	return validKanjis_json, nil
 }
 
-func LookupDefinitions(kanji string, pageNumber int) ([]byte, error) {
+func LookUpDefinitions(kanji string, pageNumber int) ([]byte, error) {
 	kanjiToLookUp := "%"+ kanji +"%"
 
 	results := NewEntry()
@@ -277,7 +277,7 @@ func LookupDefinitions(kanji string, pageNumber int) ([]byte, error) {
 		return nil, err
 	}
 
-	err = retrieve15Words(kanjiToLookUp, pageNumber, results.Definitions)
+	err = retrieve15Definitions(kanjiToLookUp, pageNumber, results.Definitions)
 	if err != nil {
 		log.Fatal(err)
 		return nil, err

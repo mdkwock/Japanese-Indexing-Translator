@@ -1,6 +1,6 @@
 .content {
     box-sizing: inherit;
-    display: inline-block;
+    display: block;
 }
 
 .interface {
@@ -16,6 +16,7 @@
     margin-top: -25px;
     float: right;
     width:20%;
+    min-height: 26px;
 }
 
 .left-column {
@@ -28,8 +29,7 @@
 
 .input-column {
     height: 100%;
-    width: 31%;
-    min-width: 440px;
+    width: 550px;
     float: left;
 }
 
@@ -88,11 +88,12 @@
     overflow-y: auto;
     float: left;
     width: 17%;
-    max-height: 636px;
+    max-height: 810px;
 }
 
 #checkboxes {
     float: right;
+    min-height: 26px;
 }
 
 .buttons {

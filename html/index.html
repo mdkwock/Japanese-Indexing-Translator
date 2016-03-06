@@ -10,16 +10,11 @@
     <body>
 	<div class="content">
 	    <div class="left-column">
-		<div id="triangle-button">
-		    <button id="hide-textbox">△</button>
-		</div>
-		<div class="buttons">
-		    <div id="pageButton">
-		    </div>
-		</div>
-
 		<!-- Text Input Area -->
 		<div id="input-column" class="input-column">
+		    <div id="triangle-button">
+			<button id="hide-textbox">△</button>
+		    </div>
 		    <textarea id="input" placeholder="Enter your text here"></textarea>
 		    <button id="lookupkanji" type="button">Look up</button>
 		</div>
@@ -36,10 +31,36 @@
 
 		<!-- Definitions Area -->
 		<div class="right-column">
+		    <div class="buttons">
+			<div id="pageButton">
+			</div>
+		    </div>
 		    <div class="definitionscolumn">
 			<div id="results">
 			    <table border="0" id="word_result" cellspacing="0">
 				<tbody id="definitions">
+				    <template id="rowTemplate">
+					<tr>
+					    <td class="kanji_column">
+						<span class="kanji">
+						</span>
+					    </td>
+					    <td class="kana_column">
+					    </td>
+					    <td class="meanings_column">
+					    </td>
+					</tr>
+				    </template>
+				    <template id="lowerRowTemplate">
+					<tr class="lower">
+					    <td colspan="2">
+						<span class="tags">
+						</span>
+					    </td>
+					    <td>
+					    </td>
+					</tr>
+				    </template>
 				</tbody>
 			    </table>
 			</div>
@@ -49,8 +70,7 @@
 	    <div id="footer">
 		<div id="copyright">
 		    <p>
-			My site uses the <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a> dictionary, provided by the <a href="http://www.edrdg.org/edrdg/licence.html">Electronic Dictionary Research and Development Group</a>.
-
+			This site uses the <a href="http://www.edrdg.org/jmdict/j_jmdict.html">JMdict</a> dictionary, provided by the <a href="http://www.edrdg.org/edrdg/licence.html">Electronic Dictionary Research and Development Group</a>.
 			Please see the <a href="/about">data and copyright information</a> for more details.
 		    </p>
 		</div>
