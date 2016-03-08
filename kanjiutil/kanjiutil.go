@@ -83,6 +83,7 @@ func countNumberOfDefinitions(kanjiToLookUp string) (int, error) {
 	}
 	return totalNumberOfDefinitions, nil
 }
+
 func makePlaceholders(num int) string {
 	var argHolders string
 	for (num > 1) {
@@ -296,8 +297,288 @@ func init(){
 	parseSQL = "select value from k_ele where value IN ("
 	count_number_of_matches_sql_string = "select count(*) from k_ele k LEFT OUTER JOIN r_ele r ON k.fk = r.fk LEFT OUTER JOIN sense s ON s.fk = k.fk where k.value like ?;"
 	limit_results_sql_string = "select k.id, k.value, r.id, r.value, s.id from k_ele k LEFT OUTER JOIN r_ele r ON k.fk = r.fk LEFT OUTER JOIN sense s ON s.fk = k.fk where k.value like ? LIMIT page, 15;"
-	all_kanji_info_sql_string = "select k_ele.id as k_ele_id, entity.expansion as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, NULL as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from ke_inf, entity, k_ele where k_ele.id in (k) and k_ele.id = ke_inf.fk and ke_inf.entity = entity.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, ke_pri.value as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, NULL as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from ke_pri, k_ele where k_ele.id in (k) and k_ele.id = ke_pri.fk UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, r_ele.value as r_ele_val, re_restr.value as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, NULL as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from r_ele, re_restr, k_ele where k_ele.id in (k) and r_ele.id in (r) and k_ele.fk = r_ele.fk and re_restr.fk = r_ele.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, r_ele.value as r_ele_val, NULL as re_restr_val, entity.expansion as re_inf_val, NULL as re_pri_val, NULL as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from r_ele, re_inf, entity, k_ele where k_ele.id in (k) and r_ele.id in (r) and k_ele.fk = r_ele.fk and re_inf.fk = r_ele.id and re_inf.entity = entity.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, r_ele.value as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, re_pri.value as re_pri_val, NULL as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from r_ele, re_pri, k_ele where k_ele.id in (k) and r_ele.id in (r) and k_ele.fk = r_ele.fk and re_pri.fk = r_ele.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, stagk.value as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from sense, stagk, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and stagk.fk = sense.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, stagr.value as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from sense, stagr, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and stagr.fk = sense.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, NULL as stagr_val, entity.expansion as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from sense, pos, entity, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and pos.fk = sense.id and pos.entity = entity.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, xref.value as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from sense, xref, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and xref.fk = sense.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, ant.value as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from sense, ant, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and ant.fk = sense.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, entity.expansion as field_val, NULL as misc_val, NULL as s_inf_val, NULL as gloss_val from sense, field, entity, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and field.fk = sense.id and field.entity = entity.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, entity.expansion as misc_val, NULL as s_inf_val, NULL as gloss_val from sense, misc, entity, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and misc.fk = sense.id and misc.entity = entity.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, s_inf.value as s_inf_val, NULL as gloss_val from sense, s_inf, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and s_inf.fk = sense.id UNION ALL select k_ele.id as k_ele_id, NULL as ke_inf_val, NULL as ke_pri_val, NULL as r_ele_val, NULL as re_restr_val, NULL as re_inf_val, NULL as re_pri_val, sense.id as sense_id, NULL as stagk_val, NULL as stagr_val, NULL as pos_val, NULL as xref_val, NULL as ant_val, NULL as field_val, NULL as misc_val, NULL as s_inf_val, gloss.value as gloss_val from sense, gloss, k_ele where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and gloss.fk = sense.id;"
-
+	all_kanji_info_sql_string =
+		`
+                select k_ele.id as k_ele_id,
+                 entity.expansion as ke_inf_val,
+                 NULL as ke_pri_val,
+                 NULL as r_ele_val,
+                 NULL as re_restr_val,
+                 NULL as re_inf_val,
+                 NULL as re_pri_val,
+                 NULL as sense_id,
+                 NULL as stagk_val,
+                 NULL as stagr_val,
+                 NULL as pos_val,
+                 NULL as xref_val,
+                 NULL as ant_val,
+                 NULL as field_val,
+                 NULL as misc_val,
+                 NULL as s_inf_val,
+                 NULL as gloss_val
+                from ke_inf, entity, k_ele
+                where k_ele.id in (k) and k_ele.id = ke_inf.fk and ke_inf.entity = entity.id
+                UNION ALL
+                select k_ele.id as k_ele_id,
+                 NULL as ke_inf_val,
+                 ke_pri.value as ke_pri_val,
+                 NULL as r_ele_val,
+                 NULL as re_restr_val,
+                 NULL as re_inf_val,
+                 NULL as re_pri_val,
+                 NULL as sense_id,
+                 NULL as stagk_val,
+                 NULL as stagr_val,
+                 NULL as pos_val,
+                 NULL as xref_val,
+                 NULL as ant_val,
+                 NULL as field_val,
+                 NULL as misc_val,
+                 NULL as s_inf_val,
+                 NULL as gloss_val
+                from ke_pri, k_ele
+                where k_ele.id in (k) and k_ele.id = ke_pri.fk
+                UNION ALL
+                select k_ele.id as k_ele_id,
+                 NULL as ke_inf_val,
+                 NULL as ke_pri_val,
+                 r_ele.value as r_ele_val,
+                 re_restr.value as re_restr_val,
+                 NULL as re_inf_val,
+                 NULL as re_pri_val,
+                 NULL as sense_id,
+                 NULL as stagk_val,
+                 NULL as stagr_val,
+                 NULL as pos_val,
+                 NULL as xref_val,
+                 NULL as ant_val,
+                 NULL as field_val,
+                 NULL as misc_val,
+                 NULL as s_inf_val,
+                 NULL as gloss_val
+                from r_ele, re_restr, k_ele
+                where k_ele.id in (k) and r_ele.id in (r) and k_ele.fk = r_ele.fk and re_restr.fk = r_ele.id
+                UNION ALL
+                select k_ele.id as k_ele_id,
+                 NULL as ke_inf_val,
+                 NULL as ke_pri_val,
+                 r_ele.value as r_ele_val,
+                 NULL as re_restr_val,
+                 entity.expansion as re_inf_val,
+                 NULL as re_pri_val,
+                 NULL as sense_id,
+                 NULL as stagk_val,
+                 NULL as stagr_val,
+                 NULL as pos_val,
+                 NULL as xref_val,
+                 NULL as ant_val,
+                 NULL as field_val,
+                 NULL as misc_val,
+                 NULL as s_inf_val,
+                 NULL as gloss_val
+                from r_ele, re_inf, entity, k_ele
+                where k_ele.id in (k) and r_ele.id in (r) and k_ele.fk = r_ele.fk and re_inf.fk = r_ele.id and re_inf.entity = entity.id
+                UNION ALL
+                select k_ele.id as k_ele_id,
+                 NULL as ke_inf_val,
+                 NULL as ke_pri_val,
+                 r_ele.value as r_ele_val,
+                 NULL as re_restr_val,
+                 NULL as re_inf_val,
+                 re_pri.value as re_pri_val,
+                 NULL as sense_id,
+                 NULL as stagk_val,
+                 NULL as stagr_val,
+                 NULL as pos_val,
+                 NULL as xref_val,
+                 NULL as ant_val,
+                 NULL as field_val,
+                 NULL as misc_val,
+                 NULL as s_inf_val,
+                 NULL as gloss_val
+                from r_ele, re_pri, k_ele
+                where k_ele.id in (k) and r_ele.id in (r) and k_ele.fk = r_ele.fk and re_pri.fk = r_ele.id
+                UNION ALL
+                select k_ele.id as k_ele_id,
+                 NULL as ke_inf_val,
+                 NULL as ke_pri_val,
+                 NULL as r_ele_val,
+                 NULL as re_restr_val,
+                 NULL as re_inf_val,
+                 NULL as re_pri_val,
+                 sense.id as sense_id,
+                 stagk.value as stagk_val,
+                 NULL as stagr_val,
+                 NULL as pos_val,
+                 NULL as xref_val,
+                 NULL as ant_val,
+                 NULL as field_val,
+                 NULL as misc_val,
+                 NULL as s_inf_val,
+                 NULL as gloss_val
+                from sense, stagk, k_ele
+                where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and stagk.fk = sense.id
+                UNION ALL
+                select k_ele.id as k_ele_id,
+                 NULL as ke_inf_val,
+                 NULL as ke_pri_val,
+                 NULL as r_ele_val,
+                 NULL as re_restr_val,
+                 NULL as re_inf_val,
+                 NULL as re_pri_val,
+                 sense.id as sense_id,
+                 NULL as stagk_val,
+                 stagr.value as stagr_val,
+                 NULL as pos_val,
+                 NULL as xref_val,
+                 NULL as ant_val,
+                 NULL as field_val,
+                 NULL as misc_val,
+                 NULL as s_inf_val,
+                 NULL as gloss_val
+                from sense, stagr, k_ele
+                where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and stagr.fk = sense.id
+                UNION ALL
+                select k_ele.id as k_ele_id,
+                 NULL as ke_inf_val,
+                 NULL as ke_pri_val,
+                 NULL as r_ele_val,
+                 NULL as re_restr_val,
+                 NULL as re_inf_val,
+                 NULL as re_pri_val,
+                 sense.id as sense_id,
+                 NULL as stagk_val,
+                 NULL as stagr_val,
+                 entity.expansion as pos_val,
+                 NULL as xref_val,
+                 NULL as ant_val,
+                 NULL as field_val,
+                 NULL as misc_val,
+                 NULL as s_inf_val,
+                 NULL as gloss_val
+                from sense, pos, entity, k_ele
+                where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and pos.fk = sense.id and pos.entity = entity.id
+                UNION ALL
+                select k_ele.id as k_ele_id,
+                 NULL as ke_inf_val,
+                 NULL as ke_pri_val,
+                 NULL as r_ele_val,
+                 NULL as re_restr_val,
+                 NULL as re_inf_val,
+                 NULL as re_pri_val,
+                 sense.id as sense_id,
+                 NULL as stagk_val,
+                 NULL as stagr_val,
+                 NULL as pos_val,
+                 xref.value as xref_val,
+                 NULL as ant_val,
+                 NULL as field_val,
+                 NULL as misc_val,
+                 NULL as s_inf_val,
+                 NULL as gloss_val
+                from sense, xref, k_ele
+                where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and xref.fk = sense.id
+                UNION ALL
+                select k_ele.id as k_ele_id,
+                 NULL as ke_inf_val,
+                 NULL as ke_pri_val,
+                 NULL as r_ele_val,
+                 NULL as re_restr_val,
+                 NULL as re_inf_val,
+                 NULL as re_pri_val,
+                 sense.id as sense_id,
+                 NULL as stagk_val,
+                 NULL as stagr_val,
+                 NULL as pos_val,
+                 NULL as xref_val,
+                 ant.value as ant_val,
+                 NULL as field_val,
+                 NULL as misc_val,
+                 NULL as s_inf_val,
+                 NULL as gloss_val
+                from sense, ant, k_ele
+                where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and ant.fk = sense.id
+                UNION ALL
+                select k_ele.id as k_ele_id,
+                 NULL as ke_inf_val,
+                 NULL as ke_pri_val,
+                 NULL as r_ele_val,
+                 NULL as re_restr_val,
+                 NULL as re_inf_val,
+                 NULL as re_pri_val,
+                 sense.id as sense_id,
+                 NULL as stagk_val,
+                 NULL as stagr_val,
+                 NULL as pos_val,
+                 NULL as xref_val,
+                 NULL as ant_val,
+                 entity.expansion as field_val,
+                 NULL as misc_val,
+                 NULL as s_inf_val,
+                 NULL as gloss_val
+                from sense, field, entity, k_ele
+                where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and field.fk = sense.id and field.entity = entity.id
+                UNION ALL
+                select k_ele.id as k_ele_id,
+                 NULL as ke_inf_val,
+                 NULL as ke_pri_val,
+                 NULL as r_ele_val,
+                 NULL as re_restr_val,
+                 NULL as re_inf_val,
+                 NULL as re_pri_val,
+                 sense.id as sense_id,
+                 NULL as stagk_val,
+                 NULL as stagr_val,
+                 NULL as pos_val,
+                 NULL as xref_val,
+                 NULL as ant_val,
+                 NULL as field_val,
+                 entity.expansion as misc_val,
+                 NULL as s_inf_val,
+                 NULL as gloss_val
+                from sense, misc, entity, k_ele
+                where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and misc.fk = sense.id and misc.entity = entity.id
+                UNION ALL
+                select k_ele.id as k_ele_id,
+                 NULL as ke_inf_val,
+                 NULL as ke_pri_val,
+                 NULL as r_ele_val,
+                 NULL as re_restr_val,
+                 NULL as re_inf_val,
+                 NULL as re_pri_val,
+                 sense.id as sense_id,
+                 NULL as stagk_val,
+                 NULL as stagr_val,
+                 NULL as pos_val,
+                 NULL as xref_val,
+                 NULL as ant_val,
+                 NULL as field_val,
+                 NULL as misc_val,
+                 s_inf.value as s_inf_val,
+                 NULL as gloss_val
+                from sense, s_inf, k_ele
+                where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and s_inf.fk = sense.id
+                UNION ALL
+                select k_ele.id as k_ele_id,
+                 NULL as ke_inf_val,
+                 NULL as ke_pri_val,
+                 NULL as r_ele_val,
+                 NULL as re_restr_val,
+                 NULL as re_inf_val,
+                 NULL as re_pri_val,
+                 sense.id as sense_id,
+                 NULL as stagk_val,
+                 NULL as stagr_val,
+                 NULL as pos_val,
+                 NULL as xref_val,
+                 NULL as ant_val,
+                 NULL as field_val,
+                 NULL as misc_val,
+                 NULL as s_inf_val,
+                 gloss.value as gloss_val
+                from sense, gloss, k_ele
+                where k_ele.id in (k) and sense.id in (s) and k_ele.fk = sense.fk and gloss.fk = sense.id;
+`
 	var err error
 	db, err = sql.Open("sqlite3", "jmdict.db")
 	if err != nil {

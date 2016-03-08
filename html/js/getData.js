@@ -18,16 +18,17 @@ function empty(divNode) {
 }
 
 function appendToTable(results) {
-    var odd = true;
+    var odd = true,
+	definitionsTableDiv = document.importNode(definitionsDiv.content, true);
+    empty(wordTableDiv);
     for (var row in results) {
-	var definitionRowFragment = document.importNode(rowTemplateDiv.content, true),
-	    definitionRow = definitionRowFragment.querySelector('tr'),
-	    tds = definitionRow.querySelectorAll('td'),
-	    lowerRowFragment = document.importNode(lowerRowTemplateDiv.content, true),
-	    lowerRow = lowerRowFragment.querySelector('tr'),
-	    lowertd = lowerRow.querySelector('td');
 	for (var kana in results[row].R_ele) {
-	    var tr = document.createElement('tr'),
+	    var definitionRowFragment = document.importNode(rowTemplateDiv.content, true),
+		definitionRow = definitionRowFragment.querySelector('tr'),
+		tds = definitionRow.querySelectorAll('td'),
+		lowerRowFragment = document.importNode(lowerRowTemplateDiv.content, true),
+		lowerRow = lowerRowFragment.querySelector('tr'),
+		lowertd = lowerRow.querySelector('td'),
 		kanji_td = tds[0],
 		kana_td = tds[1],
 		meanings_td = tds[2],
@@ -87,10 +88,11 @@ function appendToTable(results) {
 	    spanLower.appendChild(lowertd_text);
 	    lowerRow.className = lowerRow.className + ' ' + definitionRow.className;
 
-	    definitionsDiv.appendChild(definitionRow);
-	    definitionsDiv.appendChild(lowerRow);
+	    definitionsTableDiv.appendChild(definitionRow);
+	    definitionsTableDiv.appendChild(lowerRow);
 	}
     }
+    wordTableDiv.appendChild(definitionsTableDiv);
 }
 
 function appendPrevPageButton(kanji, currentPage) {
@@ -241,22 +243,23 @@ function parseForKanji() {
     history.replaceState({}, document.title, url.href);
 }
 
-var currPage = 0;
-var kanjiOnPage = "";
-var pageButtonDiv = document.getElementById("pageButton");
-var definitionsDiv = document.getElementById("definitions");
-var outputColumnDiv = document.getElementById("output-column");
-var outputareaDiv = document.getElementById("outputarea");
-var charCheckBox = document.getElementById('characters');
-var wordsCheckBox = document.getElementById('words');
-var inputColumnDiv = document.getElementById('input-column');
-var input = document.querySelector('#input');
-var button = document.querySelector('#lookupkanji');
-var initialLoad = false;
-var helpDiv = document.getElementById('help-div');
-var triangleButtonDiv = document.getElementById('hide-textbox');
-var rowTemplateDiv = document.querySelector('#rowTemplate');
-var lowerRowTemplateDiv = document.querySelector('#lowerRowTemplate');
+var currPage = 0,
+kanjiOnPage = "",
+pageButtonDiv = document.getElementById("pageButton"),
+wordTableDiv = document.getElementById("word_result"),
+outputColumnDiv = document.getElementById("output-column"),
+outputareaDiv = document.getElementById("outputarea"),
+charCheckBox = document.getElementById('characters'),
+wordsCheckBox = document.getElementById('words'),
+inputColumnDiv = document.getElementById('input-column'),
+input = document.querySelector('#input'),
+button = document.querySelector('#lookupkanji'),
+initialLoad = false,
+helpDiv = document.getElementById('help-div'),
+triangleButtonDiv = document.getElementById('hide-textbox'),
+rowTemplateDiv = document.querySelector('#rowTemplate'),
+lowerRowTemplateDiv = document.querySelector('#lowerRowTemplate'),
+definitionsDiv = document.querySelector('#definitionsTemplate');
 
 button.addEventListener('click', parseForKanji);
 
