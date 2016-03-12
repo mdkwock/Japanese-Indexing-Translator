@@ -9,63 +9,56 @@
 
     <body>
 	<div class="content">
-	    <div class="left-column">
-		<!-- Text Input Area -->
-		<div id="input-column" class="input-column">
-		    <div id="triangle-button">
-			<button id="hide-textbox">△</button>
-		    </div>
-		    <textarea id="input" placeholder="Enter your text here"></textarea>
-		    <button id="lookupkanji" type="button">Look up</button>
-		</div>
+	    <!-- Text Input Area -->
+	    <div id="input-column" class="input-column">
+		<textarea id="input" placeholder="Enter your text here"></textarea>
+		<button id="lookupkanji" type="button">Look up</button>
+	    </div>
 
-		<!-- Word Count Statistics and Buttons -->
-		<div id="output-column" class="output-column">
-		    <div id="checkboxes">
-			<input type="checkbox" id="characters" checked>Characters
-			<input type="checkbox" id="words" checked>Words
-		    </div>
-		    <div id="outputarea" class="outputarea">
+	    <!-- Word Count Statistics and Buttons -->
+	    <div id="output-column" class="output-column">
+		<div id="outputarea" class="outputarea">
+		</div>
+	    </div>
+
+	    <!-- Definitions Area -->
+	    <div class="right-column">
+		<div class="buttons">
+		    <!-- Toggle for Words and Characters -->
+		    <button id="wordCharacterToggle" class="toggle-flat-button not-active">Characters Only</button>
+		    <div id="pageButton">
 		    </div>
 		</div>
-
-		<!-- Definitions Area -->
-		<div class="right-column">
-		    <div class="buttons">
-			<div id="pageButton">
-			</div>
-		    </div>
-		    <div class="definitionscolumn">
-			<div id="results">
-			    <table border="0" id="word_result" cellspacing="0">
-				<template id="definitionsTemplate">
-				    <tbody id="definitions">
-				    </tbody>
-				</template>
-				<template id="rowTemplate">
-				    <tr>
-					<td class="kanji_column">
-					    <span class="kanji">
-					    </span>
-					</td>
-					<td class="kana_column">
-					</td>
-					<td class="meanings_column">
-					</td>
-				    </tr>
-				</template>
-				<template id="lowerRowTemplate">
-				    <tr class="lower">
-					<td colspan="2">
-					    <span class="tags">
-					    </span>
-					</td>
-					<td>
-					</td>
-				    </tr>
-				</template>
-			    </table>
-			</div>
+		<div class="definitionscolumn">
+		    <div id="results">
+			<table border="0" id="word_result" cellspacing="0">
+			    <template id="definitionsTemplate">
+				<tbody id="definitions">
+				</tbody>
+			    </template>
+			    <template id="rowTemplate">
+				<tr>
+				    <td class="kanji_column">
+					<span class="kanji">
+					</span>
+				    </td>
+				    <td class="kana_column">
+				    </td>
+				    <td class="meanings_column">
+				    </td>
+				</tr>
+			    </template>
+			    <template id="lowerRowTemplate">
+				<tr class="lower">
+				    <td colspan="2">
+					<span class="tags">
+					</span>
+				    </td>
+				    <td>
+				    </td>
+				</tr>
+			    </template>
+			</table>
 		    </div>
 		</div>
 	    </div>

@@ -19,7 +19,8 @@ function empty(divNode) {
 
 function appendToTable(results) {
     var odd = true,
-	definitionsTableDiv = document.importNode(definitionsDiv.content, true);
+	definitionsTableFragment = document.importNode(definitionsDiv.content, true),
+	definitionsTable = definitionsTableFragment.querySelector('tbody');
     empty(wordTableDiv);
     for (var row in results) {
 	for (var kana in results[row].R_ele) {
@@ -88,11 +89,11 @@ function appendToTable(results) {
 	    spanLower.appendChild(lowertd_text);
 	    lowerRow.className = lowerRow.className + ' ' + definitionRow.className;
 
-	    definitionsTableDiv.appendChild(definitionRow);
-	    definitionsTableDiv.appendChild(lowerRow);
+	    definitionsTable.appendChild(definitionRow);
+	    definitionsTable.appendChild(lowerRow);
 	}
     }
-    wordTableDiv.appendChild(definitionsTableDiv);
+    wordTableDiv.appendChild(definitionsTable);
 }
 
 function appendPrevPageButton(kanji, currentPage) {
@@ -159,7 +160,7 @@ function showDefinitions(kanji, page) {
     $.post("/post", wordtolookup,
 	   function(data,status) {
 	       var definitions = JSON.parse(data);
-	       console.log(definitions);
+	       // console.log(definitions);
 	       empty(definitionsDiv);
 	       applyPageButtons(definitions.NumDefinitionsTotal, currPage, kanji);
 	       appendToTable(definitions.Definitions);
@@ -249,8 +250,7 @@ pageButtonDiv = document.getElementById("pageButton"),
 wordTableDiv = document.getElementById("word_result"),
 outputColumnDiv = document.getElementById("output-column"),
 outputareaDiv = document.getElementById("outputarea"),
-charCheckBox = document.getElementById('characters'),
-wordsCheckBox = document.getElementById('words'),
+charCheckBox = document.getElementById('wordCharacterToggle'),
 inputColumnDiv = document.getElementById('input-column'),
 input = document.querySelector('#input'),
 button = document.querySelector('#lookupkanji'),
@@ -264,27 +264,6 @@ definitionsDiv = document.querySelector('#definitionsTemplate');
 button.addEventListener('click', parseForKanji);
 
 window.onload = function(){
-    document.getElementById('words').onchange = function() {
-	$(".not-single").toggle(15);
-    };
-
-    document.getElementById('characters').onchange = function() {
-	$(".single-char").toggle(15);
-    };
-
-    // triangleButtonDiv.onclick = function() {
-    // 	if (inputColumnDiv.style.display != "none") {
-    // 	    inputColumnDiv.style.display = "none";
-    // 	    outputColumnDiv.className = "output-column-expanded";
-    // 	    triangleButtonDiv.innerHTML = "Hide Text△";
-    // 	}
-    // 	else{
-    // 	    inputColumnDiv.style.display = "inline-block";
-    // 	    outputColumnDiv.className = "output-column";
-    // 	    triangleButtonDiv.innerHTML = "Show Text△";
-    // 	}
-    // };
-
     $('#pageButton').on('click', function(ev) {
 	if (ev.target.id === 'next')
 	    showDefinitions(kanjiOnPage, currPage+1);
@@ -295,15 +274,17 @@ window.onload = function(){
     });
 
     $('#outputarea').on('click', function(ev) {
-	// if ($(ev.target).hasClass('flat-button')) {
-	//     helpDiv.innerHTML = "";
-	//     helpDiv.style.marginTop = 0;
-	// }
+	if ($(ev.target).hasClass('flat-button')) {
 	    showDefinitions(ev.target.value, 0);
+	}
     });
 
+    $('#wordCharacterToggle').on('click', function(ev) {
+	$('#wordCharacterToggle').toggleClass('not-active');
+	$('.not-single').toggle();
+    });
     if (window.location.hash.substring(1) !== "") {
-	console.log(window.location.hash.substring(1));
+	// console.log(window.location.hash.substring(1));
 	input.value = window.location.hash.substring(1);
 	empty(outputareaDiv);
 	parseForKanji();

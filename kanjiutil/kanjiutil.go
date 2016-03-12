@@ -107,22 +107,21 @@ func createGetInfoSQL(k_ids []string, r_ids []string, s_ids []string) string {
 	return kr_inf_sql
 }
 
-func retrieve15Definitions(kanjiToLookUp string, pageNumber int, word_definitions map[string]*dictionaryresult) error {
+func retrieveDefinitionIds(kanjiToLookUp string, pageNumber int, definitions map[string]*dictionaryresult) (k_ele_ids, r_ele_ids, sense_ids []string, err error) {
 	// Query with LIMIT using pages
 	get_15_definitions_sql := strings.Replace(limit_results_sql_string, "page", strconv.Itoa(pageNumber * 15), 1)
 	stmt, err := db.Prepare(get_15_definitions_sql)
 	if err != nil {
 		log.Fatal(err)
-		return err
+		return k_ele_ids, r_ele_ids, sense_ids, err
 	}
 
 	rows, err := stmt.Query(kanjiToLookUp)
 	if err != nil {
 		log.Fatal(err)
-		return err
+		return k_ele_ids, r_ele_ids, sense_ids, err
 	}
 
-	var k_ele_ids, r_ele_ids, sense_ids []string
 	for rows.Next() {
 		var k_ele_id_key, kanji, r_ele_id_key, kana, sense_id_key string
 		var k_ele_id, r_ele_id, sense_id int
@@ -130,7 +129,7 @@ func retrieve15Definitions(kanjiToLookUp string, pageNumber int, word_definition
 		err := rows.Scan(&k_ele_id, &kanji, &r_ele_id, &kana, &sense_id)
 		if err != nil {
 			log.Fatal(err)
-			return err
+			return k_ele_ids, r_ele_ids, sense_ids, err
 		}
 
 		k_ele_id_key = strconv.Itoa(k_ele_id)
@@ -141,23 +140,30 @@ func retrieve15Definitions(kanjiToLookUp string, pageNumber int, word_definition
 		r_ele_ids = append(r_ele_ids, r_ele_id_key)
 		sense_ids = append(sense_ids, sense_id_key)
 
-		if word_definitions[k_ele_id_key] == nil {
-			word_definitions[k_ele_id_key] = NewDictionaryResult()
-			word_definitions[k_ele_id_key].K_ele.Kanji = kanji
+		if definitions[k_ele_id_key] == nil {
+			definitions[k_ele_id_key] = NewDictionaryResult()
+			definitions[k_ele_id_key].K_ele.Kanji = kanji
 		}
 
-		if word_definitions[k_ele_id_key].R_ele[kana] == nil {
-			word_definitions[k_ele_id_key].R_ele[kana] = &Releinfo{}
+		if definitions[k_ele_id_key].R_ele[kana] == nil {
+			definitions[k_ele_id_key].R_ele[kana] = &Releinfo{}
 		}
 
-		if word_definitions[k_ele_id_key].Sense[sense_id_key] == nil {
-			word_definitions[k_ele_id_key].Sense[sense_id_key] = &Senseinfo{}
+		if definitions[k_ele_id_key].Sense[sense_id_key] == nil {
+			definitions[k_ele_id_key].Sense[sense_id_key] = &Senseinfo{}
 		}
 	}
+	return k_ele_ids, r_ele_ids, sense_ids, err
+}
 
+/*
+Get the related information such as pronunciation, definition,
+antonyms, synonyms, and etc from all the database tables
+*/
+func retrieveDefinitionInfo(k_ele_ids, r_ele_ids, sense_ids []string, word_definitions map[string]*dictionaryresult) error {
 	kr_inf_sql := createGetInfoSQL(k_ele_ids, r_ele_ids, sense_ids)
 	// get all information related to the kanji results from the initial sql
-	rows, err = db.Query(kr_inf_sql)
+	rows, err := db.Query(kr_inf_sql)
 	if err != nil{
 		log.Fatal(err)
 		return err
@@ -221,6 +227,16 @@ func retrieve15Definitions(kanjiToLookUp string, pageNumber int, word_definition
 			word_definitions[k_ele_id_key].Sense[sense_id_value].Gloss = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Gloss, gloss_val.String)
 		}
 	}
+}
+
+func retrieve15Definitions(kanjiToLookUp string, pageNumber int, word_definitions map[string]*dictionaryresult) error {
+
+	k_ele_ids, r_ele_ids, sense_ids, err := retrieveDefinitionIds(kanjiToLookUp, pageNumber, word_definitions)
+	if err != nil{
+		log.Fatal(err)
+		return err
+	}
+
 	return nil
 }
 
