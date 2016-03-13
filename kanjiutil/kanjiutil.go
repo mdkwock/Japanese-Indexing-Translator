@@ -12,18 +12,24 @@ import (
 var limit_results_sql_string, all_kanji_info_sql_string, parseSQL, count_number_of_matches_sql_string string
 var db *sql.DB
 
+// Keleinfo stores Kanji information such as the text
+// representing the word and how common the word is in everyday life
 type Keleinfo struct {
 	Kanji string
 	Ke_inf []string
 	Ke_pri []string
 }
 
+// Releinfo stores how the word is pronounced in kana (the Japanese alphabet)
 type Releinfo struct {
 	Re_restr []string
 	Re_inf []string
 	Re_pri []string
 }
 
+// Senseinfo stores information related to the definiton of a word
+// such as the meaning, antonymns, synonyms, field of application (i.e. Medical term)
+// dialect, and part of speech
 type Senseinfo struct {
 	Stagk []string
 	Stagr []string
@@ -36,12 +42,16 @@ type Senseinfo struct {
 	Gloss []string
 }
 
+// An entry stores information related to a retrieval of a word
+// (generally holds 15 definitions at a time)
 type entry struct {
 	Definitions map[string]*dictionaryresult
 	Page int
 	NumDefinitionsTotal int
 }
 
+// A dictionaryresult stores information for a lookup of
+// a single k_ele id from the database
 type dictionaryresult struct {
 	K_ele Keleinfo
 	R_ele map[string]*Releinfo
@@ -56,6 +66,7 @@ func NewEntry() *entry {
 	return &entry{make(map[string]*dictionaryresult),0,0}
 }
 
+// countNumberOfDefinitions returns the total number of definitions related to a kanji
 func countNumberOfDefinitions(kanjiToLookUp string) (int, error) {
 	// Query for total number of definitions to decide
 	// how many page buttons should be created on the frontend
@@ -84,6 +95,8 @@ func countNumberOfDefinitions(kanjiToLookUp string) (int, error) {
 	return totalNumberOfDefinitions, nil
 }
 
+// makePlaceholders is a helper function used to created num amount
+// of placeholders for a prepared statement
 func makePlaceholders(num int) string {
 	var argHolders string
 	for (num > 1) {
@@ -94,6 +107,7 @@ func makePlaceholders(num int) string {
 	return argHolders
 }
 
+// createGetInfoSQL prepares the SQL statement used to retrieve definition information from the database
 func createGetInfoSQL(k_ids []string, r_ids []string, s_ids []string) string {
 	k_id_holders := "(" + strings.Join(k_ids, ",") + ")"
 	r_id_holders := "(" + strings.Join(r_ids, ",") + ")"
@@ -107,6 +121,9 @@ func createGetInfoSQL(k_ids []string, r_ids []string, s_ids []string) string {
 	return kr_inf_sql
 }
 
+// retrieveDefinitionIds returns the definition ids related to kanjiToLookUp
+// this is used for lookup later to avoid JOINing all the tables in the database
+// as JOINing will exponentially blow up the number of rows returned due to the number of tables
 func retrieveDefinitionIds(kanjiToLookUp string, pageNumber int, definitions map[string]*dictionaryresult) (k_ele_ids, r_ele_ids, sense_ids []string, err error) {
 	// Query with LIMIT using pages
 	get_15_definitions_sql := strings.Replace(limit_results_sql_string, "page", strconv.Itoa(pageNumber * 15), 1)
@@ -156,11 +173,10 @@ func retrieveDefinitionIds(kanjiToLookUp string, pageNumber int, definitions map
 	return k_ele_ids, r_ele_ids, sense_ids, err
 }
 
-/*
-Get the related information such as pronunciation, definition,
-antonyms, synonyms, and etc from all the database tables
-*/
-func retrieveDefinitionInfo(k_ele_ids, r_ele_ids, sense_ids []string, word_definitions map[string]*dictionaryresult) error {
+// retrieveDefinitionInfo retrieves all information related to the passed in ids
+// such as pronunciation, definition, antonyms, synonyms, and etc
+// from the entire database
+func retrieveDefinitionInfo(k_ele_ids, r_ele_ids, sense_ids []string, definitions map[string]*dictionaryresult) error {
 	kr_inf_sql := createGetInfoSQL(k_ele_ids, r_ele_ids, sense_ids)
 	// get all information related to the kanji results from the initial sql
 	rows, err := db.Query(kr_inf_sql)
@@ -190,48 +206,56 @@ func retrieveDefinitionInfo(k_ele_ids, r_ele_ids, sense_ids []string, word_defin
 
 		switch {
 		case ke_inf_val.Valid:
-			word_definitions[k_ele_id_key].K_ele.Ke_inf = append(word_definitions[k_ele_id_key].K_ele.Ke_inf, ke_inf_val.String)
+			definitions[k_ele_id_key].K_ele.Ke_inf = append(definitions[k_ele_id_key].K_ele.Ke_inf, ke_inf_val.String)
 		case ke_pri_val.Valid:
-			word_definitions[k_ele_id_key].K_ele.Ke_pri = append(word_definitions[k_ele_id_key].K_ele.Ke_pri, ke_pri_val.String)
+			definitions[k_ele_id_key].K_ele.Ke_pri = append(definitions[k_ele_id_key].K_ele.Ke_pri, ke_pri_val.String)
 		case re_restr_val.Valid:
-			if word_definitions[k_ele_id_key].R_ele[r_ele_val.String] != nil {
-				word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_restr = append(word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_restr, re_restr_val.String)
+			if definitions[k_ele_id_key].R_ele[r_ele_val.String] != nil {
+				definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_restr = append(definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_restr, re_restr_val.String)
 			}
 		case re_inf_val.Valid:
-			if word_definitions[k_ele_id_key].R_ele[r_ele_val.String] != nil {
-				word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_inf = append(word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_inf, re_inf_val.String)
+			if definitions[k_ele_id_key].R_ele[r_ele_val.String] != nil {
+				definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_inf = append(definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_inf, re_inf_val.String)
 			}
 		case re_pri_val.Valid:
-			if word_definitions[k_ele_id_key].R_ele[r_ele_val.String] != nil {
-				word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_pri = append(word_definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_pri, re_pri_val.String)
+			if definitions[k_ele_id_key].R_ele[r_ele_val.String] != nil {
+				definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_pri = append(definitions[k_ele_id_key].R_ele[r_ele_val.String].Re_pri, re_pri_val.String)
 			}
-		case word_definitions[k_ele_id_key].Sense[sense_id_value] == nil:
+		case definitions[k_ele_id_key].Sense[sense_id_value] == nil:
 			// continue;
 		case stagk_val.Valid:
-			word_definitions[k_ele_id_key].Sense[sense_id_value].Stagk = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Stagk, stagk_val.String)
+			definitions[k_ele_id_key].Sense[sense_id_value].Stagk = append(definitions[k_ele_id_key].Sense[sense_id_value].Stagk, stagk_val.String)
 		case stagr_val.Valid:
-			word_definitions[k_ele_id_key].Sense[sense_id_value].Stagr = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Stagr, stagr_val.String)
+			definitions[k_ele_id_key].Sense[sense_id_value].Stagr = append(definitions[k_ele_id_key].Sense[sense_id_value].Stagr, stagr_val.String)
 		case pos_val.Valid:
-			word_definitions[k_ele_id_key].Sense[sense_id_value].Pos = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Pos, pos_val.String)
+			definitions[k_ele_id_key].Sense[sense_id_value].Pos = append(definitions[k_ele_id_key].Sense[sense_id_value].Pos, pos_val.String)
 		case xref_val.Valid:
-			word_definitions[k_ele_id_key].Sense[sense_id_value].Xref = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Xref, xref_val.String)
+			definitions[k_ele_id_key].Sense[sense_id_value].Xref = append(definitions[k_ele_id_key].Sense[sense_id_value].Xref, xref_val.String)
 		case ant_val.Valid:
-			word_definitions[k_ele_id_key].Sense[sense_id_value].Ant = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Ant, ant_val.String)
+			definitions[k_ele_id_key].Sense[sense_id_value].Ant = append(definitions[k_ele_id_key].Sense[sense_id_value].Ant, ant_val.String)
 		case field_val.Valid:
-			word_definitions[k_ele_id_key].Sense[sense_id_value].Field = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Field, field_val.String)
+			definitions[k_ele_id_key].Sense[sense_id_value].Field = append(definitions[k_ele_id_key].Sense[sense_id_value].Field, field_val.String)
 		case misc_val.Valid:
-			word_definitions[k_ele_id_key].Sense[sense_id_value].Misc = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Misc, misc_val.String)
+			definitions[k_ele_id_key].Sense[sense_id_value].Misc = append(definitions[k_ele_id_key].Sense[sense_id_value].Misc, misc_val.String)
 		case s_inf_val.Valid:
-			word_definitions[k_ele_id_key].Sense[sense_id_value].S_inf = append(word_definitions[k_ele_id_key].Sense[sense_id_value].S_inf, s_inf_val.String)
+			definitions[k_ele_id_key].Sense[sense_id_value].S_inf = append(definitions[k_ele_id_key].Sense[sense_id_value].S_inf, s_inf_val.String)
 		case gloss_val.Valid:
-			word_definitions[k_ele_id_key].Sense[sense_id_value].Gloss = append(word_definitions[k_ele_id_key].Sense[sense_id_value].Gloss, gloss_val.String)
+			definitions[k_ele_id_key].Sense[sense_id_value].Gloss = append(definitions[k_ele_id_key].Sense[sense_id_value].Gloss, gloss_val.String)
 		}
 	}
+	return nil
 }
 
-func retrieve15Definitions(kanjiToLookUp string, pageNumber int, word_definitions map[string]*dictionaryresult) error {
+// retrieve15Definitions populates the definitions parameters
+// with database data for 15 definitions
+func retrieve15Definitions(kanjiToLookUp string, pageNumber int, definitions map[string]*dictionaryresult) error {
+	k_ele_ids, r_ele_ids, sense_ids, err := retrieveDefinitionIds(kanjiToLookUp, pageNumber, definitions)
+	if err != nil{
+		log.Fatal(err)
+		return err
+	}
 
-	k_ele_ids, r_ele_ids, sense_ids, err := retrieveDefinitionIds(kanjiToLookUp, pageNumber, word_definitions)
+	err = retrieveDefinitionInfo(k_ele_ids, r_ele_ids, sense_ids, definitions)
 	if err != nil{
 		log.Fatal(err)
 		return err
@@ -240,39 +264,49 @@ func retrieve15Definitions(kanjiToLookUp string, pageNumber int, word_definition
 	return nil
 }
 
+// ParseForKanji returns the valid kanji words that are available for lookup in the database
 func ParseForKanji(textToParse []string) ([]byte, error) {
-	parseSQLStmt := parseSQL + makePlaceholders(len(textToParse)) + ");"
-	stmt, err := db.Prepare(parseSQLStmt)
-	if err != nil{
-		log.Fatal(err)
-		return nil, err
-	}
-	defer stmt.Close()
-
+	var validKanjis []string
+	var kanji string
 	// Query database with the dynamic prepared statement
 	convertedArgs := make([]interface{}, len(textToParse))
 	for i, v := range textToParse {
 		convertedArgs[i] = interface{}(v)
 	}
 
-	rows, err := stmt.Query(convertedArgs...)
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-	defer rows.Close()
+	for i, words := 0, len(textToParse); words > 0; words, i = words-999, i+999 {
+		var numberOfWords int
+		if words > 999 {
+			numberOfWords = 999
+		} else {
+			numberOfWords = words;
+		}
 
-	var validKanjis []string
-	var kanji string
-	for rows.Next() {
-		err := rows.Scan(&kanji)
+		// create the prepared statement used later to determine which words are valid for lookup
+		parseSQLStmt := parseSQL + makePlaceholders(numberOfWords) + ");"
+		stmt, err := db.Prepare(parseSQLStmt)
+		if err != nil{
+			log.Fatal(err)
+			return nil, err
+		}
+		defer stmt.Close()
+
+		rows, err := stmt.Query(convertedArgs[i:i+numberOfWords]...)
 		if err != nil {
 			log.Fatal(err)
 			return nil, err
 		}
-		validKanjis = append(validKanjis, kanji)
-	}
+		defer rows.Close()
 
+		for rows.Next() {
+			err := rows.Scan(&kanji)
+			if err != nil {
+				log.Fatal(err)
+				return nil, err
+			}
+			validKanjis = append(validKanjis, kanji)
+		}
+	}
 	validKanjis_json, err := json.Marshal(validKanjis)
 	if err != nil {
 		log.Println("Json text problem")
@@ -281,6 +315,7 @@ func ParseForKanji(textToParse []string) ([]byte, error) {
 	return validKanjis_json, nil
 }
 
+// LookupDefinitions returns 15 definitions for kanji offset by the pageNumber
 func LookUpDefinitions(kanji string, pageNumber int) ([]byte, error) {
 	kanjiToLookUp := "%"+ kanji +"%"
 
@@ -309,6 +344,7 @@ func LookUpDefinitions(kanji string, pageNumber int) ([]byte, error) {
 	return definitions, nil
 }
 
+// The init prepares the sql statements used for database access and opens a database connection
 func init(){
 	parseSQL = "select value from k_ele where value IN ("
 	count_number_of_matches_sql_string = "select count(*) from k_ele k LEFT OUTER JOIN r_ele r ON k.fk = r.fk LEFT OUTER JOIN sense s ON s.fk = k.fk where k.value like ?;"
