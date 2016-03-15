@@ -160,7 +160,7 @@ function showDefinitions(kanji, page) {
     $.post("/post", wordtolookup,
 	   function(data,status) {
 	       var definitions = JSON.parse(data);
-	       // console.log(definitions);
+	       console.log(definitions);
 	       empty(definitionsDiv);
 	       applyPageButtons(definitions.NumDefinitionsTotal, currPage, kanji);
 	       appendToTable(definitions.Definitions);
@@ -175,7 +175,7 @@ Object.size = function(obj) {
     return size;
 };
 
-function addButtonsUsingArray(arrayWithKeys, statsMap) {
+function addWordButtons(arrayWithKeys, statsMap) {
     var sortedStats = arrayWithKeys.sort(function(a,b) {
 	if (statsMap[b] - statsMap[a] == 0)
 	    return b.length - a.length;
@@ -196,7 +196,7 @@ function addButtonsUsingArray(arrayWithKeys, statsMap) {
     }
 }
 
-function addButtonsUsingMap(statsMap, clearOutputArea) {
+function addCharacterButtons(statsMap, clearOutputArea) {
     var sortedStats = Object.keys(statsMap)
 	.sort(function(a,b) {
 	    return statsMap[b] - statsMap[a];
@@ -228,15 +228,16 @@ function addPermutations(text) {
 
 function parseForKanji() {
     var inputText = input.value;
-    var splitUpParsedText = inputText.match(/[^ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖ、・。“” ']+/g);
-    splitUpParsedText = addPermutations(splitUpParsedText);
+    var segmenter = new TinySegmenter();
+    var segs = segmenter.segment(inputText);
+    var splitUpParsedText = addPermutations(segs);
     var reducedParsedText = Object.keys(splitUpParsedText);
     var textToParse = JSON.stringify(reducedParsedText);
     $.post("/parse", textToParse,
 	   function(data,status) {
 	       var validKanji = JSON.parse(data);
-	       addButtonsUsingArray(validKanji, splitUpParsedText);
-	       addButtonsUsingMap(wordStat(inputText),false);
+	       addWordButtons(validKanji, splitUpParsedText);
+	       addCharacterButtons(wordStat(inputText),false);
 	   });
     var url = document.createElement('a');
     url.href = window.location;

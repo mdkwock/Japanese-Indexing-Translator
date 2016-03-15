@@ -93,6 +93,7 @@
     overflow-y: auto;
     width: 17%;
     max-width: 263px;
+    min-width: 207px;
     max-height: 806px;
     margin-top: -2px;
     display: inline-block;

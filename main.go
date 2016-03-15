@@ -55,7 +55,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request){
 
 func parseWordsHandler(w http.ResponseWriter, r *http.Request){
 	if r.Method != "POST" {
-		log.Println("in post but early return")
+		log.Println("Request wasn't a post")
 		http.NotFound(w, r)
 		return
 	}
