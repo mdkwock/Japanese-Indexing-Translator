@@ -19,23 +19,22 @@ function empty(divNode) {
 
 function appendToTable(results) {
     var odd = true,
-	definitionsTableFragment = document.importNode(definitionsDiv.content, true),
+	definitionsTableFragment = document.importNode(definitionsDiv, true),
 	definitionsTable = definitionsTableFragment.querySelector('tbody');
     empty(wordTableDiv);
     for (var row in results) {
 	for (var kana in results[row].R_ele) {
-	    var definitionRowFragment = document.importNode(rowTemplateDiv.content, true),
+	    var definitionRowFragment = document.importNode(rowTemplateDiv, true),
 		definitionRow = definitionRowFragment.querySelector('tr'),
 		tds = definitionRow.querySelectorAll('td'),
-		lowerRowFragment = document.importNode(lowerRowTemplateDiv.content, true),
+		lowerRowFragment = document.importNode(lowerRowTemplateDiv, true),
 		lowerRow = lowerRowFragment.querySelector('tr'),
 		lowertd = lowerRow.querySelector('td'),
 		kanji_td = tds[0],
 		kana_td = tds[1],
 		meanings_td = tds[2],
 		span = kanji_td.getElementsByClassName('kanji')[0],
-		spanLower = lowertd.getElementsByClassName('tags')[0],
-		kanji_text = document.createTextNode(results[row].K_ele.Kanji);
+		spanLower = lowertd.getElementsByClassName('tags')[0];
 
 	    definitionRow.className = (odd) ? 'odd' : 'even';
 	    odd = !odd;
@@ -161,7 +160,7 @@ function showDefinitions(kanji, page) {
 	   function(data,status) {
 	       var definitions = JSON.parse(data);
 	       console.log(definitions);
-	       empty(definitionsDiv);
+	       empty(wordTableDiv);
 	       applyPageButtons(definitions.NumDefinitionsTotal, currPage, kanji);
 	       appendToTable(definitions.Definitions);
 	   });
@@ -175,14 +174,30 @@ Object.size = function(obj) {
     return size;
 };
 
-function addWordButtons(arrayWithKeys, statsMap) {
+function appendToNode(node, text, isWord, statsMap, i) {
+    if (isWord) {
+	$(node).append('<button type="button" value="'+ text[i] +'" class="flat-button not-single">'+ text[i] +' : '+ statsMap[text[i]]+'</button>');
+    }
+    else {
+	$(node).append('<button type="button" value="'+text[i]+'" class="flat-button single-char">'+text[i]+' : '+statsMap[text[i]]+'</button>');
+    }
+}
+
+function addButtons(validKanji, wordStats, originalText) {
+    empty(outputColumnDiv);
+    var outputAreaFragment = document.importNode(outputAreaDivFragment,false),
+	outputAreaDiv = outputAreaDivFragment.getElementById('outputarea');
+    addWordButtons(validKanji, wordStats, outputAreaDiv);
+    addCharacterButtons(originalText, outputAreaDiv);
+    outputColumnDiv.appendChild(outputAreaDiv);
+}
+
+function addWordButtons(arrayWithKeys, statsMap, outputAreaDiv) {
     var sortedStats = arrayWithKeys.sort(function(a,b) {
 	if (statsMap[b] - statsMap[a] == 0)
 	    return b.length - a.length;
 	return statsMap[b] - statsMap[a];
     });
-
-    empty(outputareaDiv);
 
     var testDuplicate = {};
     for (var index in sortedStats) {
@@ -192,17 +207,18 @@ function addWordButtons(arrayWithKeys, statsMap) {
 	    continue;
 	}
 
-	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button not-single">'+sortedStats[index]+' : '+ statsMap[sortedStats[index]]+'</button>');
+	appendToNode(outputAreaDiv, sortedStats, true, statsMap, index);
     }
 }
 
-function addCharacterButtons(statsMap, clearOutputArea) {
+function addCharacterButtons(originalText, outputAreaDiv) {
+    var statsMap = wordStat(originalText);
     var sortedStats = Object.keys(statsMap)
 	.sort(function(a,b) {
 	    return statsMap[b] - statsMap[a];
 	});
     for (var index in sortedStats) {
-	$(".outputarea").append('<button type="button" value="'+sortedStats[index]+'" class="flat-button single-char">'+sortedStats[index]+' : '+statsMap[sortedStats[index]]+'</button>');
+	appendToNode(outputAreaDiv, sortedStats, false, statsMap, index);
     }
 }
 
@@ -219,6 +235,7 @@ function addPermutations(text) {
 	    }
 	}
     }
+    // returns a map[word] -> wordCount
     return parsedtext.reduce(function (stat, word) {
         if (!stat[word]) stat[word] = 0;
         stat[word]++;
@@ -236,8 +253,7 @@ function parseForKanji() {
     $.post("/parse", textToParse,
 	   function(data,status) {
 	       var validKanji = JSON.parse(data);
-	       addWordButtons(validKanji, splitUpParsedText);
-	       addCharacterButtons(wordStat(inputText),false);
+	       addButtons(validKanji, splitUpParsedText, inputText);
 	   });
     var url = document.createElement('a');
     url.href = window.location;
@@ -250,17 +266,17 @@ kanjiOnPage = "",
 pageButtonDiv = document.getElementById("pageButton"),
 wordTableDiv = document.getElementById("word_result"),
 outputColumnDiv = document.getElementById("output-column"),
-outputareaDiv = document.getElementById("outputarea"),
+outputAreaDivFragment = document.getElementById("outputAreaTemplate").content,
 charCheckBox = document.getElementById('wordCharacterToggle'),
 inputColumnDiv = document.getElementById('input-column'),
-input = document.querySelector('#input'),
-button = document.querySelector('#lookupkanji'),
+input = document.getElementById('input'),
+button = document.getElementById('lookupkanji'),
 initialLoad = false,
 helpDiv = document.getElementById('help-div'),
 triangleButtonDiv = document.getElementById('hide-textbox'),
-rowTemplateDiv = document.querySelector('#rowTemplate'),
-lowerRowTemplateDiv = document.querySelector('#lowerRowTemplate'),
-definitionsDiv = document.querySelector('#definitionsTemplate');
+rowTemplateDiv = document.getElementById('rowTemplate').content,
+lowerRowTemplateDiv = document.getElementById('lowerRowTemplate').content,
+definitionsDiv = document.getElementById('definitionsTemplate').content;
 
 button.addEventListener('click', parseForKanji);
 
@@ -274,7 +290,7 @@ window.onload = function(){
 	    showDefinitions(ev.target.value, parseInt(ev.target.id)-1);
     });
 
-    $('#outputarea').on('click', function(ev) {
+    $('#output-column').on('click', function(ev) {
 	if ($(ev.target).hasClass('flat-button')) {
 	    showDefinitions(ev.target.value, 0);
 	}
@@ -287,7 +303,7 @@ window.onload = function(){
     if (window.location.hash.substring(1) !== "") {
 	// console.log(window.location.hash.substring(1));
 	input.value = window.location.hash.substring(1);
-	empty(outputareaDiv);
+	empty(outputColumnDiv);
 	parseForKanji();
     }
 

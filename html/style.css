@@ -145,6 +145,7 @@
 
 #word_result td {
     padding: 3px;
+    vertical-align: top;
 }
 
 #word_result .meanings_column {

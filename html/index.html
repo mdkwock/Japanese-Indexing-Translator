@@ -17,9 +17,11 @@
 
 	    <!-- Word Count Statistics and Buttons -->
 	    <div id="output-column" class="output-column">
+	    </div>
+	    <template id="outputAreaTemplate">
 		<div id="outputarea" class="outputarea">
 		</div>
-	    </div>
+	    </template>
 
 	    <!-- Definitions Area -->
 	    <div class="right-column">
@@ -32,33 +34,33 @@
 		<div class="definitionscolumn">
 		    <div id="results">
 			<table border="0" id="word_result" cellspacing="0">
-			    <template id="definitionsTemplate">
-				<tbody id="definitions">
-				</tbody>
-			    </template>
-			    <template id="rowTemplate">
-				<tr>
-				    <td class="kanji_column">
-					<span class="kanji">
-					</span>
-				    </td>
-				    <td class="kana_column">
-				    </td>
-				    <td class="meanings_column">
-				    </td>
-				</tr>
-			    </template>
-			    <template id="lowerRowTemplate">
-				<tr class="lower">
-				    <td colspan="2">
-					<span class="tags">
-					</span>
-				    </td>
-				    <td>
-				    </td>
-				</tr>
-			    </template>
 			</table>
+			<template id="definitionsTemplate">
+			    <tbody id="definitions">
+			    </tbody>
+			</template>
+			<template id="rowTemplate">
+			    <tr>
+				<td class="kanji_column">
+				    <span class="kanji">
+				    </span>
+				</td>
+				<td class="kana_column">
+				</td>
+				<td class="meanings_column">
+				</td>
+			    </tr>
+			</template>
+			<template id="lowerRowTemplate">
+			    <tr class="lower">
+				<td colspan="2">
+				    <span class="tags">
+				    </span>
+				</td>
+				<td>
+				</td>
+			    </tr>
+			</template>
 		    </div>
 		</div>
 	    </div>
