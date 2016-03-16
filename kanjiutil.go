@@ -1,4 +1,4 @@
-package kanjiutil
+package main
 
 import (
 	"log"

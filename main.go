@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/user/translationapp/kanjiutil"
 	"strings"
 	"encoding/json"
 )
@@ -28,7 +27,7 @@ func main(){
 	http.HandleFunc("/", static(HomeHandler))
 	http.HandleFunc("/about/", static(aboutHandler))
 	http.HandleFunc("/parse", parseWordsHandler)
-	http.HandleFunc("/post", lookUpWordHandler)
+	http.HandleFunc("/lookUpWord", lookUpWordHandler)
 	http.ListenAndServe(":42893", nil)
 }
 
@@ -76,7 +75,7 @@ func parseWordsHandler(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	validKanjis, err := kanjiutil.ParseForKanji(textToParse);
+	validKanjis, err := ParseForKanji(textToParse);
 	if err != nil {
 		log.Println(err)
 	}
@@ -99,7 +98,7 @@ func lookUpWordHandler(w http.ResponseWriter, r *http.Request){
 		log.Fatal(err)
 	}
 
-	definitions, err := kanjiutil.LookUpDefinitions(lookUpInfo.Kanji, lookUpInfo.Page);
+	definitions, err := LookUpDefinitions(lookUpInfo.Kanji, lookUpInfo.Page);
 	if err != nil {
 		log.Fatal(err)
 	}
