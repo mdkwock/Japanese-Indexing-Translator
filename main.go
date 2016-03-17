@@ -20,7 +20,7 @@ type LookUpInfo struct {
 }
 
 func main(){
-	fmt.Println("starting server on http://localhost:42893/")
+	fmt.Println("starting server on http://localhost:80/")
 	mux = http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir("./html")))
 	mux.Handle("/about/", http.FileServer(http.Dir("../html")))
@@ -28,7 +28,7 @@ func main(){
 	http.HandleFunc("/about/", static(aboutHandler))
 	http.HandleFunc("/parse", parseWordsHandler)
 	http.HandleFunc("/lookUpWord", lookUpWordHandler)
-	http.ListenAndServe(":42893", nil)
+	http.ListenAndServe(":80", nil)
 }
 
 func static(h http.HandlerFunc) http.HandlerFunc {

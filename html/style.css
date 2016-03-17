@@ -269,12 +269,17 @@ button:disabled {
   margin-top: 3px;
 }
 
+#wordCharacterToggle {
+    display: none;
+}
+
 .not-active {
     background-color: #DDDDDD;
 }
 
 .out-dated {
     color: #AD0404;
+    font-size: 0.9em;
 }
 
 #copyright {

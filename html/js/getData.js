@@ -261,6 +261,7 @@ function parseForKanji() {
     url.href = window.location;
     url.hash = input.value;
     history.replaceState({}, document.title, url.href);
+    $('#wordCharacterToggle').toggle();
 }
 
 var currPage = 0,
