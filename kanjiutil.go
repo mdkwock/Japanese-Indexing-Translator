@@ -347,10 +347,20 @@ func LookUpDefinitions(kanji string, pageNumber int) ([]byte, error) {
 // The init prepares the sql statements used for database access and opens a database connection
 func init(){
 	parseSQL = "select value from k_ele where value IN ("
-	count_number_of_matches_sql_string = "select count(*) from k_ele k LEFT OUTER JOIN r_ele r ON k.fk = r.fk LEFT OUTER JOIN sense s ON s.fk = k.fk where k.value like ?;"
-	limit_results_sql_string = "select k.id, k.value, r.id, r.value, s.id from k_ele k LEFT OUTER JOIN r_ele r ON k.fk = r.fk LEFT OUTER JOIN sense s ON s.fk = k.fk where k.value like ? LIMIT page, 15;"
-	all_kanji_info_sql_string =
-		`
+	count_number_of_matches_sql_string = `
+                select count(*)
+                from k_ele k
+                LEFT OUTER JOIN r_ele r ON k.fk = r.fk
+                LEFT OUTER JOIN sense s ON s.fk = k.fk
+                where k.value like ?;`
+	limit_results_sql_string = `select k.id, k.value, r.id, r.value, s.id
+                from (
+                SELECT k_ele.id, k_ele.value, k_ele.fk
+                FROM k_ele
+                WHERE k_ele.value like ? LIMIT page, 15) k
+                LEFT OUTER JOIN r_ele r ON k.fk = r.fk
+                LEFT OUTER JOIN sense s ON s.fk = k.fk;`
+	all_kanji_info_sql_string = `
                 select k_ele.id as k_ele_id,
                  entity.expansion as ke_inf_val,
                  NULL as ke_pri_val,

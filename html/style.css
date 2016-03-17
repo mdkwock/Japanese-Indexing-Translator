@@ -135,12 +135,14 @@
     width: 98%;
     display: block;
     color: #000;
+    white-space: nowrap;
 }
 
 #word_result .kana_column {
     font-family: "HiraKakuPro-W3", "Hiragino Kaku Gothic Pro W3", "ヒラギノ角ゴ Pro W3", Meiryo, "MS PGothic", Sans-Serif;
     font-size: 1.8em;
     width: 20%;
+    white-space: nowrap;
 }
 
 #word_result td {
@@ -269,6 +271,10 @@ button:disabled {
 
 .not-active {
     background-color: #DDDDDD;
+}
+
+.out-dated {
+    color: #AD0404;
 }
 
 #copyright {

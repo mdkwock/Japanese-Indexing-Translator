@@ -23,74 +23,76 @@ function appendToTable(results) {
 	definitionsTable = definitionsTableFragment.querySelector('tbody');
     empty(wordTableDiv);
     for (var row in results) {
+	var definitionRowFragment = document.importNode(rowTemplateDiv, true),
+	    definitionRow = definitionRowFragment.querySelector('tr'),
+	    tds = definitionRow.querySelectorAll('td'),
+	    lowerRowFragment = document.importNode(lowerRowTemplateDiv, true),
+	    lowerRow = lowerRowFragment.querySelector('tr'),
+	    lowertd = lowerRow.querySelector('td'),
+	    kanji_td = tds[0],
+	    kana_td = tds[1],
+	    meanings_td = tds[2],
+	    span = kanji_td.getElementsByClassName('kanji')[0],
+	    spanLower = lowertd.getElementsByClassName('tags')[0];
+
+	definitionRow.className = (odd) ? 'odd' : 'even';
+	odd = !odd;
+
+	// Kanji column
+	span.textContent = results[row].K_ele.Kanji;
+
+	// Kana column
+	var alternativePronunciation = false;
 	for (var kana in results[row].R_ele) {
-	    var definitionRowFragment = document.importNode(rowTemplateDiv, true),
-		definitionRow = definitionRowFragment.querySelector('tr'),
-		tds = definitionRow.querySelectorAll('td'),
-		lowerRowFragment = document.importNode(lowerRowTemplateDiv, true),
-		lowerRow = lowerRowFragment.querySelector('tr'),
-		lowertd = lowerRow.querySelector('td'),
-		kanji_td = tds[0],
-		kana_td = tds[1],
-		meanings_td = tds[2],
-		span = kanji_td.getElementsByClassName('kanji')[0],
-		spanLower = lowertd.getElementsByClassName('tags')[0];
-
-	    definitionRow.className = (odd) ? 'odd' : 'even';
-	    odd = !odd;
-
-	    // Kanji column
-	    span.textContent = results[row].K_ele.Kanji;
-
-	    // Kana column
-	    kana_td.textContent = kana;
-
-	    // Meanings column
-	    var definitionNum = 1,
-		numberOfDefinitions = Object.size(results[row].Sense),
-		numberTheList = (numberOfDefinitions > 1);
-	    var isCommonWord = (results[row].K_ele.Ke_pri != null) ? (results[row].K_ele.Ke_pri.length > 0) : false;
-	    var pos_text = [];
-
-	    for (var meaning in results[row].Sense) {
-		var meaning_text = document.createTextNode(results[row].Sense[meaning].Gloss.join('; '));
-		if (results[row].Sense[meaning].Pos != null)
-		    pos_text = pos_text.concat(results[row].Sense[meaning].Pos);
-
-		if (numberTheList) {
-		    var number = document.createElement('strong');
-		    number.appendChild(document.createTextNode(definitionNum + '. '));
-		    meanings_td.appendChild(number);
-		}
-
-		meanings_td.appendChild(meaning_text);
-		if (results[row].Sense[meaning].Field != null) {
-		    var numFields = results[row].Sense[meaning].Field.length,
-			fields_text = "";
-		    for (var i = 0; i < numFields; i++) {
-			fields_text += " ("+ results[row].Sense[meaning].Field[i] + ")";
-		    }
-		    meanings_td.appendChild(document.createTextNode(fields_text));
-		}
-		meanings_td.appendChild(document.createElement('br'));
-
-		definitionNum++;
-
-	    }
-	    //lower part of the row
-	    if (isCommonWord) {
-		var spanCommon = document.createElement('span');
-		spanCommon.className = "common";
-		spanCommon.appendChild(document.createTextNode((pos_text != null) ? 'Common word, ' : 'Common word'));
-		spanLower.appendChild(spanCommon);
-	    }
-	    var lowertd_text = document.createTextNode(pos_text.join(', '));
-	    spanLower.appendChild(lowertd_text);
-	    lowerRow.className = lowerRow.className + ' ' + definitionRow.className;
-
-	    definitionsTable.appendChild(definitionRow);
-	    definitionsTable.appendChild(lowerRow);
+	    kana_td.innerHTML += alternativePronunciation ? '<br><span title="out-dated" class="out-dated">「'+kana+'」</span>': kana;
+	    alternativePronunciation = true;
 	}
+
+	// Meanings column
+	var definitionNum = 1,
+	    numberOfDefinitions = Object.size(results[row].Sense),
+	    numberTheList = (numberOfDefinitions > 1);
+	var isCommonWord = (results[row].K_ele.Ke_pri != null) ? (results[row].K_ele.Ke_pri.length > 0) : false;
+	var pos_text = [];
+
+	for (var meaning in results[row].Sense) {
+	    var meaning_text = document.createTextNode(results[row].Sense[meaning].Gloss.join('; '));
+	    if (results[row].Sense[meaning].Pos != null)
+		pos_text = pos_text.concat(results[row].Sense[meaning].Pos);
+
+	    if (numberTheList) {
+		var number = document.createElement('strong');
+		number.appendChild(document.createTextNode(definitionNum + '. '));
+		meanings_td.appendChild(number);
+	    }
+
+	    meanings_td.appendChild(meaning_text);
+	    if (results[row].Sense[meaning].Field != null) {
+		var numFields = results[row].Sense[meaning].Field.length,
+		    fields_text = "";
+		for (var i = 0; i < numFields; i++) {
+		    fields_text += " ("+ results[row].Sense[meaning].Field[i] + ")";
+		}
+		meanings_td.appendChild(document.createTextNode(fields_text));
+	    }
+	    meanings_td.appendChild(document.createElement('br'));
+
+	    definitionNum++;
+
+	}
+	//lower part of the row
+	if (isCommonWord) {
+	    var spanCommon = document.createElement('span');
+	    spanCommon.className = "common";
+	    spanCommon.appendChild(document.createTextNode((pos_text != null) ? 'Common word, ' : 'Common word'));
+	    spanLower.appendChild(spanCommon);
+	}
+	var lowertd_text = document.createTextNode(pos_text.join(', '));
+	spanLower.appendChild(lowertd_text);
+	lowerRow.className = lowerRow.className + ' ' + definitionRow.className;
+
+	definitionsTable.appendChild(definitionRow);
+	definitionsTable.appendChild(lowerRow);
     }
     wordTableDiv.appendChild(definitionsTable);
 }
@@ -159,7 +161,7 @@ function showDefinitions(kanji, page) {
     $.post("/lookUpWord", wordtolookup,
 	   function(data,status) {
 	       var definitions = JSON.parse(data);
-	       // console.log(definitions);
+	       console.log(definitions);
 	       empty(wordTableDiv);
 	       applyPageButtons(definitions.NumDefinitionsTotal, currPage, kanji);
 	       appendToTable(definitions.Definitions);
