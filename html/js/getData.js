@@ -161,7 +161,7 @@ function showDefinitions(kanji, page) {
     $.post("/lookUpWord", wordtolookup,
 	   function(data,status) {
 	       var definitions = JSON.parse(data);
-	       console.log(definitions);
+	       //console.log(definitions);
 	       empty(wordTableDiv);
 	       applyPageButtons(definitions.NumDefinitionsTotal, currPage, kanji);
 	       appendToTable(definitions.Definitions);

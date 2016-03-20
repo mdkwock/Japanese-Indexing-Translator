@@ -28,7 +28,15 @@ func main(){
 	http.HandleFunc("/about/", static(aboutHandler))
 	http.HandleFunc("/parse", parseWordsHandler)
 	http.HandleFunc("/lookUpWord", lookUpWordHandler)
-	http.ListenAndServe(":8080", nil)
+	go http.ListenAndServeTLS(":8081", "cert.pem", "key.pem", nil)
+	err := http.ListenAndServe(":8080", http.HandlerFunc(redirectToHTTPS))
+	if err != nil {
+		log.Fatal("ListenAndServe error: %v", err)
+	}
+}
+
+func redirectToHTTPS(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, ":8081"+r.RequestURI, http.StatusMovedPermanently)
 }
 
 func static(h http.HandlerFunc) http.HandlerFunc {
