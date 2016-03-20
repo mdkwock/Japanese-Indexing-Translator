@@ -187,8 +187,8 @@ function appendToNode(node, text, isWord, statsMap, i) {
 
 function addButtons(validKanji, wordStats, originalText) {
     empty(outputColumnDiv);
-    var outputAreaFragment = document.importNode(outputAreaDivFragment,false),
-	outputAreaDiv = outputAreaDivFragment.getElementById('outputarea');
+    var outputAreaFragment = document.importNode(outputAreaDivFragment,true),
+	outputAreaDiv = outputAreaFragment.getElementById('outputarea');
     addWordButtons(validKanji, wordStats, outputAreaDiv);
     addCharacterButtons(originalText, outputAreaDiv);
     outputColumnDiv.appendChild(outputAreaDiv);
