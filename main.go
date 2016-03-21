@@ -36,7 +36,8 @@ func main(){
 }
 
 func redirectToHTTPS(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, ":8081"+r.RequestURI, http.StatusMovedPermanently)
+	log.Println("redirecting to https")
+	http.Redirect(w, r, "https://jp.novel-index.com", http.StatusMovedPermanently)
 }
 
 func static(h http.HandlerFunc) http.HandlerFunc {
