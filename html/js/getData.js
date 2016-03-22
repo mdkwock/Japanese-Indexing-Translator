@@ -190,8 +190,9 @@ function addButtons(validKanji, wordStats, originalText) {
     var outputAreaFragment = document.importNode(outputAreaDivFragment,true),
 	outputAreaDiv = outputAreaFragment.getElementById('outputarea');
     addWordButtons(validKanji, wordStats, outputAreaDiv);
-    addCharacterButtons(originalText, outputAreaDiv);
+    //addCharacterButtons(originalText, outputAreaDiv);
     outputColumnDiv.appendChild(outputAreaDiv);
+    $('#wordCharacterToggle').toggle();
 }
 
 function addWordButtons(arrayWithKeys, statsMap, outputAreaDiv) {
@@ -225,7 +226,6 @@ function addCharacterButtons(originalText, outputAreaDiv) {
 }
 
 function addPermutations(text) {
-    var parsedtext = [];
     var arrayLength = text.length;
     for (var i = 0; i < arrayLength; i++) {
 	// another for loop for each letter in the word
@@ -233,12 +233,12 @@ function addPermutations(text) {
 	for (var j = 0; j < wordLength; j++) {
 	    //another for loop for each word length
 	    for (var k = 2; (k+j) < wordLength + 1; k++) {
-		parsedtext.push(text[i].substr(j,k));
+		text.push(text[i].substr(j,k));
 	    }
 	}
     }
     // returns a map[word] -> wordCount
-    return parsedtext.reduce(function (stat, word) {
+    return text.reduce(function (stat, word) {
         if (!stat[word]) stat[word] = 0;
         stat[word]++;
         return stat;
@@ -261,7 +261,6 @@ function parseForKanji() {
     url.href = window.location;
     url.hash = input.value;
     history.replaceState({}, document.title, url.href);
-    $('#wordCharacterToggle').toggle();
 }
 
 var currPage = 0,
