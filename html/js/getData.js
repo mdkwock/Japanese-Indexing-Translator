@@ -176,8 +176,8 @@ Object.size = function(obj) {
     return size;
 };
 
-function appendToNode(node, text, isWord, statsMap, i) {
-    if (isWord) {
+function appendToNode(node, text, statsMap, i) {
+    if (text[i].length > 1) {
 	$(node).append('<button type="button" value="'+ text[i] +'" class="flat-button not-single">'+ text[i] +' : '+ statsMap[text[i]]+'</button>');
     }
     else {
@@ -210,7 +210,7 @@ function addWordButtons(arrayWithKeys, statsMap, outputAreaDiv) {
 	    continue;
 	}
 
-	appendToNode(outputAreaDiv, sortedStats, true, statsMap, index);
+	appendToNode(outputAreaDiv, sortedStats, statsMap, index);
     }
 }
 
@@ -221,7 +221,7 @@ function addCharacterButtons(originalText, outputAreaDiv) {
 	    return statsMap[b] - statsMap[a];
 	});
     for (var index in sortedStats) {
-	appendToNode(outputAreaDiv, sortedStats, false, statsMap, index);
+	appendToNode(outputAreaDiv, sortedStats, statsMap, index);
     }
 }
 
