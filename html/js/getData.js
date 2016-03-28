@@ -42,10 +42,30 @@ function appendToTable(results) {
 	span.textContent = results[row].K_ele.Kanji;
 
 	// Kana column
-	var alternativePronunciation = false;
+	var moreThanOneKana = false;
 	for (var kana in results[row].R_ele) {
-	    kana_td.innerHTML += alternativePronunciation ? '<br><span title="out-dated" class="out-dated">「'+kana+'」</span>': kana;
-	    alternativePronunciation = true;
+	    if (moreThanOneKana) kana_td.appendChild(document.createElement('br'));
+	    var kana_span_copy = document.importNode(kanaSpans,true);
+	    var kana_span = kana_span_copy.querySelector('.kana');
+	    var romaji_span = kana_span_copy.querySelector('.english');
+	    if (results[row].R_ele[kana].Re_pri) {
+		kana_span.className += ' common';
+		kana_span.title += 'commonly used pronunciation';
+		romaji_span.className += ' common';
+	    }
+	    if (results[row].R_ele[kana].Re_inf && results[row].R_ele[kana].Re_inf[0].match('^(ok|ik)')) {
+		kana_span.className += ' out-dated';
+		romaji_span.className += ' out-dated';
+		romaji_span.title += 'out-dated';
+		kana_span.textContent = '「'+kana+ '」';
+		romaji_span.textContent =  '「' + wanakana.toRomaji(kana) + '」';
+	    }
+	    else {
+		kana_span.textContent = kana;
+		romaji_span.textContent =  wanakana.toRomaji(kana);
+	    }
+	    kana_td.appendChild(kana_span_copy);
+	    moreThanOneKana = true;
 	}
 
 	// Meanings column
@@ -217,12 +237,12 @@ function addWordButtons(validKanji, kanjiStats, outputAreaDiv) {
 
 function addCharacterButtons(originalText, outputAreaDiv) {
     var statsMap = wordStat(originalText);
-    var sortedStats = Object.keys(statsMap)
+    var sortedKeys = Object.keys(statsMap)
 	.sort(function(a,b) {
 	    return statsMap[b] - statsMap[a];
 	});
-    for (var index in sortedStats) {
-	appendToNode(outputAreaDiv, sortedStats, statsMap, index);
+    for (var index in sortedKeys) {
+	appendToNode(outputAreaDiv, sortedKeys, statsMap, index);
     }
 }
 
@@ -282,6 +302,7 @@ helpDiv = document.getElementById('help-div'),
 triangleButtonDiv = document.getElementById('hide-textbox'),
 rowTemplateDiv = document.getElementById('rowTemplate').content,
 lowerRowTemplateDiv = document.getElementById('lowerRowTemplate').content,
+kanaSpans = document.getElementById('kanaSpanTemplate').content,
 definitionsDiv = document.getElementById('definitionsTemplate').content;
 
 button.addEventListener('click', parseForKanji);

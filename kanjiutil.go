@@ -425,7 +425,7 @@ func init(){
                  NULL as ke_pri_val,
                  r_ele.value as r_ele_val,
                  NULL as re_restr_val,
-                 entity.expansion as re_inf_val,
+                 entity.entity as re_inf_val,
                  NULL as re_pri_val,
                  NULL as sense_id,
                  NULL as stagk_val,

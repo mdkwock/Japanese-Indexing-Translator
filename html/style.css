@@ -145,6 +145,24 @@
     white-space: nowrap;
 }
 
+#word_result .kana_column .kana {
+    display: inline;
+}
+
+#word_result .kana_column:hover .kana {
+    display: none;
+}
+
+#word_result .kana_column .english {
+    display: none;
+    font-size: .9em;
+}
+
+#word_result .kana_column:hover .english {
+    display: inline;
+    font-size: .9em;
+}
+
 #word_result td {
     padding: 3px;
     vertical-align: top;
