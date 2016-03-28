@@ -204,6 +204,7 @@ function addWordButtons(validKanji, kanjiStats, outputAreaDiv) {
 
     var testDuplicate = {};
     for (var index in sortedStats) {
+	if (sortedStats[index].length < 2) continue;
 	if (!testDuplicate[sortedStats[index]]) {
 	    testDuplicate[sortedStats[index]] = 1;
 	} else {
