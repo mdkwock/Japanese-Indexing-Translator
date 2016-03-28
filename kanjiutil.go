@@ -350,10 +350,9 @@ func init(){
 	count_number_of_matches_sql_string = `
                 select count(*)
                 from k_ele k
-                LEFT OUTER JOIN r_ele r ON k.fk = r.fk
-                LEFT OUTER JOIN sense s ON s.fk = k.fk
                 where k.value like ?;`
-	limit_results_sql_string = `select k.id, k.value, r.id, r.value, s.id
+	limit_results_sql_string = `
+                select k.id, k.value, r.id, r.value, s.id
                 from (
                 SELECT k_ele.id, k_ele.value, k_ele.fk
                 FROM k_ele

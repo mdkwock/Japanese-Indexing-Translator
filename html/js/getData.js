@@ -1,5 +1,5 @@
 function isJapanese(letter) {
-        return ((letter > '\u4dff' && letter < '\u9faf') || (letter > '\u33ff' && letter < '\u4dc0'));
+    return letter.match('[一-龠々〆ヵヶ]');
 }
 
 function wordStat(text) {
@@ -185,21 +185,21 @@ function appendToNode(node, text, statsMap, i) {
     }
 }
 
-function addButtons(validKanji, wordStats, originalText) {
+function addButtons(validKanji, kanjiStats, originalText) {
     empty(outputColumnDiv);
     var outputAreaFragment = document.importNode(outputAreaDivFragment,true),
 	outputAreaDiv = outputAreaFragment.getElementById('outputarea');
-    addWordButtons(validKanji, wordStats, outputAreaDiv);
-    //addCharacterButtons(originalText, outputAreaDiv);
+    addWordButtons(validKanji, kanjiStats, outputAreaDiv);
+    addCharacterButtons(originalText, outputAreaDiv);
     outputColumnDiv.appendChild(outputAreaDiv);
     $('#wordCharacterToggle').toggle();
 }
 
-function addWordButtons(arrayWithKeys, statsMap, outputAreaDiv) {
-    var sortedStats = arrayWithKeys.sort(function(a,b) {
-	if (statsMap[b] - statsMap[a] == 0)
+function addWordButtons(validKanji, kanjiStats, outputAreaDiv) {
+    var sortedStats = validKanji.sort(function(a,b) {
+	if (kanjiStats[b] - kanjiStats[a] == 0)
 	    return b.length - a.length;
-	return statsMap[b] - statsMap[a];
+	return kanjiStats[b] - kanjiStats[a];
     });
 
     var testDuplicate = {};
@@ -210,7 +210,7 @@ function addWordButtons(arrayWithKeys, statsMap, outputAreaDiv) {
 	    continue;
 	}
 
-	appendToNode(outputAreaDiv, sortedStats, statsMap, index);
+	appendToNode(outputAreaDiv, sortedStats, kanjiStats, index);
     }
 }
 
