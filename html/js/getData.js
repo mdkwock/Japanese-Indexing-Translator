@@ -30,7 +30,7 @@ function appendToTable(results) {
 	    lowerRow = lowerRowFragment.querySelector('tr'),
 	    lowertd = lowerRow.querySelector('td'),
 	    kanji_td = tds[0],
-	    kana_td = tds[1],
+	    kana_td = tds[1].childNodes[1],
 	    meanings_td = tds[2],
 	    span = kanji_td.getElementsByClassName('kanji')[0],
 	    spanLower = lowertd.getElementsByClassName('tags')[0];
@@ -50,7 +50,7 @@ function appendToTable(results) {
 	    var romaji_span = kana_span_copy.querySelector('.english');
 	    if (results[row].R_ele[kana].Re_pri) {
 		kana_span.className += ' common';
-		kana_span.title += 'commonly used pronunciation';
+		romaji_span.title += 'commonly used pronunciation';
 		romaji_span.className += ' common';
 	    }
 	    if (results[row].R_ele[kana].Re_inf && results[row].R_ele[kana].Re_inf[0].match('^(ok|ik)')) {

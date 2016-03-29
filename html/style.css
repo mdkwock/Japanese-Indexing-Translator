@@ -149,6 +149,10 @@
     display: inline;
 }
 
+#word_result .kana_column .inner_kana_column {
+    min-width: 275px;
+}
+
 #word_result .kana_column:hover .kana {
     display: none;
 }
