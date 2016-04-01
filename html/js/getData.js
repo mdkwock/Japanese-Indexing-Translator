@@ -328,7 +328,6 @@ window.onload = function(){
 	$('.not-single').toggle();
     });
     if (window.location.hash.substring(1) !== "") {
-	// console.log(window.location.hash.substring(1));
 	input.value = window.location.hash.substring(1);
 	empty(outputColumnDiv);
 	parseForKanji();

@@ -12,7 +12,7 @@ import (
 
 var INDEX_HTML []byte
 var ABOUT_HTML []byte
-var mux *http.ServeMux
+var mux = http.NewServeMux()
 
 type LookUpInfo struct {
 	Kanji string `json:"kanji"`
@@ -21,7 +21,6 @@ type LookUpInfo struct {
 
 func main(){
 	fmt.Println("starting server on http://localhost:8080/")
-	mux = http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir("./html")))
 	mux.Handle("/about/", http.FileServer(http.Dir("../html")))
 	http.HandleFunc("/", static(HomeHandler))
@@ -31,7 +30,7 @@ func main(){
 	go http.ListenAndServeTLS(":8081", "cert.pem", "key.pem", nil)
 	err := http.ListenAndServe(":8080", http.HandlerFunc(redirectToHTTPS))
 	if err != nil {
-		log.Fatal("ListenAndServe error: %v", err)
+		log.Fatalf("ListenAndServe error: %v", err)
 	}
 }
 
