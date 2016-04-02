@@ -186,6 +186,10 @@ function showDefinitions(kanji, page) {
 	       applyPageButtons(definitions.NumDefinitionsTotal, currPage, kanji);
 	       appendToTable(definitions.Definitions);
 	   });
+    var url = document.createElement('a');
+    url.href = window.location;
+    url.pathname = '/search/'+kanji;
+    history.replaceState({}, document.title, url.href);
 }
 
 Object.size = function(obj) {
@@ -328,9 +332,12 @@ window.onload = function(){
 	$('.not-single').toggle();
     });
     if (window.location.hash.substring(1) !== "") {
-	input.value = window.location.hash.substring(1);
+	input.value = decodeURIComponent(window.location.hash.substring(1));
 	empty(outputColumnDiv);
 	parseForKanji();
     }
-
+    if (window.location.pathname.match("^/search/")) {
+	var kanji = decodeURIComponent(window.location.pathname.match("/search/(.*)")[1]);
+	showDefinitions(kanji, 0);
+    }
 };

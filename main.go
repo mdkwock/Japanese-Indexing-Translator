@@ -23,8 +23,12 @@ func main(){
 	fmt.Println("starting server on http://localhost:8080/")
 	mux.Handle("/", http.FileServer(http.Dir("./html")))
 	mux.Handle("/about/", http.FileServer(http.Dir("../html")))
+	mux.Handle("/search/", http.StripPrefix("/search/", http.FileServer(http.Dir("./html"))))
+
 	http.HandleFunc("/", static(HomeHandler))
+	http.HandleFunc("/search/", static(HomeHandler))
 	http.HandleFunc("/about/", static(aboutHandler))
+
 	http.HandleFunc("/parse", parseWordsHandler)
 	http.HandleFunc("/lookUpWord", lookUpWordHandler)
 	go http.ListenAndServeTLS(":8081", "cert.pem", "key.pem", nil)
