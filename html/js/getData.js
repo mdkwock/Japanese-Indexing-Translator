@@ -287,7 +287,7 @@ function parseForKanji() {
 	   });
     var url = document.createElement('a');
     url.href = window.location;
-    url.hash = input.value;
+    url.hash = encodeURIComponent(input.value);
     history.replaceState({}, document.title, url.href);
 }
 
@@ -331,13 +331,32 @@ window.onload = function(){
 	$('#wordCharacterToggle').toggleClass('not-active');
 	$('.not-single').toggle();
     });
-    if (window.location.hash.substring(1) !== "") {
-	input.value = decodeURIComponent(window.location.hash.substring(1));
-	empty(outputColumnDiv);
-	parseForKanji();
-    }
+
     if (window.location.pathname.match("^/search/")) {
 	var kanji = decodeURIComponent(window.location.pathname.match("/search/(.*)")[1]);
 	showDefinitions(kanji, 0);
+    }
+
+    if (window.location.hash.substring(1) !== "") {
+	var strLength = window.location.hash.length,
+	    subStrIndex = 1,
+	    subStrLength = 1998,
+	    appended = false;
+	while (strLength > 0) {
+	    for (var i = 1; i < 14; i++) {
+		try {
+		    input.value += decodeURIComponent(window.location.hash.substring(subStrIndex, subStrLength + i));
+		    appended = true;
+		    break;
+		}
+		catch (err) {
+		}
+	    }
+	    if (!appended) break;
+	    strLength -= subStrLength;
+	    subStrIndex += subStrLength;
+	}
+	empty(outputColumnDiv);
+	parseForKanji();
     }
 };
