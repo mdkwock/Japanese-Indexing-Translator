@@ -287,7 +287,8 @@ function parseForKanji() {
 	   });
     var url = document.createElement('a');
     url.href = window.location;
-    url.hash = encodeURIComponent(input.value);
+    url.hash = input.value;
+    // url.hash = encodeURIComponent(input.value);
     history.replaceState({}, document.title, url.href);
 }
 
@@ -338,27 +339,7 @@ window.onload = function(){
     }
 
     if (window.location.hash.substring(1) !== "") {
-	var strLength = window.location.hash.length,
-	    subStrIndex = 1,
-	    subStrLength = 1998;
-	while (strLength > 0) {
-	    var appended = false,
-		adjusted = 0;
-	    for (var i = 0; i < 14; i++) {
-		try {
-		    input.value += decodeURIComponent(window.location.hash.substring(subStrIndex, subStrIndex + subStrLength + i));
-		    adjusted = i;
-		    appended = true;
-		    break;
-		}
-		catch (err) {
-		}
-	    }
-	    if (!appended) break;
-	    strLength -= (subStrLength+adjusted);
-	    subStrIndex += subStrLength + adjusted;
-	}
-	empty(outputColumnDiv);
+	input.value = decodeURIComponent(window.location.hash.substring(1));
 	parseForKanji();
     }
 };
