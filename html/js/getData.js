@@ -213,10 +213,17 @@ function addButtons(validKanji, kanjiStats, originalText) {
     empty(outputColumnDiv);
     var outputAreaFragment = document.importNode(outputAreaDivFragment,true),
 	outputAreaDiv = outputAreaFragment.getElementById('outputarea');
-    addWordButtons(validKanji, kanjiStats, outputAreaDiv);
-    addCharacterButtons(originalText, outputAreaDiv);
+
+    var mostRepeatedKanji = addWordButtons(validKanji, kanjiStats, outputAreaDiv),
+	mostRepeatedCharacter = addCharacterButtons(originalText, outputAreaDiv);
+
     outputColumnDiv.appendChild(outputAreaDiv);
-    $('#wordCharacterToggle').toggle();
+    $('#wordCharacterToggle').show();
+
+    if (mostRepeatedKanji)
+	showDefinitions(mostRepeatedKanji, 0);
+    else
+	showDefinitions(mostRepeatedCharacter, 0);
 }
 
 function addWordButtons(validKanji, kanjiStats, outputAreaDiv) {
@@ -234,9 +241,9 @@ function addWordButtons(validKanji, kanjiStats, outputAreaDiv) {
 	} else {
 	    continue;
 	}
-
 	appendToNode(outputAreaDiv, sortedStats, kanjiStats, index);
     }
+    return sortedStats[0];
 }
 
 function addCharacterButtons(originalText, outputAreaDiv) {
@@ -248,6 +255,7 @@ function addCharacterButtons(originalText, outputAreaDiv) {
     for (var index in sortedKeys) {
 	appendToNode(outputAreaDiv, sortedKeys, statsMap, index);
     }
+    return sortedKeys[0];
 }
 
 function addPermutations(text) {
@@ -274,16 +282,16 @@ function addPermutations(text) {
 }
 
 function parseForKanji() {
-    var inputText = input.value;
-    var segmenter = new TinySegmenter();
-    var segs = segmenter.segment(inputText);
-    var splitUpParsedText = addPermutations(segs);
-    var reducedParsedText = Object.keys(splitUpParsedText);
-    var textToParse = JSON.stringify(reducedParsedText);
+    var inputText = input.value,
+	segmenter = new TinySegmenter(),
+	segs = segmenter.segment(inputText),
+	kanjiStats = addPermutations(segs),
+	kanjis = Object.keys(kanjiStats),
+	textToParse = JSON.stringify(kanjis);
     $.post("/parse", textToParse,
 	   function(data,status) {
 	       var validKanji = JSON.parse(data);
-	       addButtons(validKanji, splitUpParsedText, inputText);
+	       addButtons(validKanji, kanjiStats, inputText);
 	   });
     var url = document.createElement('a');
     url.href = window.location;
