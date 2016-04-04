@@ -262,7 +262,7 @@ function addPermutations(text) {
     var arrayLength = text.length;
     for (var i = 0; i < arrayLength; i++) {
 	// another for loop for each letter in the word
-	if (text.length < 2) continue;
+	if (text[i].length < 2) continue;
 	var wordLength = text[i].length;
 	for (var j = 0; j < wordLength; j++) {
 	    //another for loop for each word length
