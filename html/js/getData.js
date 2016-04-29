@@ -224,6 +224,8 @@ function addButtons(validKanji, kanjiStats, originalText) {
 	showDefinitions(mostRepeatedKanji, 0);
     else
 	showDefinitions(mostRepeatedCharacter, 0);
+  var titleHeight = $('h1.site-title').outerHeight(true);
+  $(window).scrollTop(titleHeight)
 }
 
 function addWordButtons(validKanji, kanjiStats, outputAreaDiv) {

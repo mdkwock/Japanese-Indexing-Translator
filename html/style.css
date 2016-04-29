@@ -1,3 +1,6 @@
+h1.site-title{
+    margin: 10px 0;
+}
 .content {
     box-sizing: inherit;
     display: block;
